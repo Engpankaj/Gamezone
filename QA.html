@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mystery Card Quiz Game</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Video Background Styles */
+  .video-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -1;
+  }
+  h1 {
+    margin-top: 1rem;
+    font-size: 2.5rem;
+    text-shadow: 0 0 10px #fff;
+  }
+  #quiz-container {
+    background: rgba(0,0,0,0.3);
+    border-radius: 15px;
+    padding: 1.5rem;
+    max-width: 600px;
+    width: 90%;
+    margin: 1rem auto 2rem;
+    box-shadow: 0 0 20px #fff3;
+  }
+  #question {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  #answer-input {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1.2rem;
+    border-radius: 8px;
+    border: none;
+    margin-bottom: 1rem;
+  }
+  #buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  button {
+    background: #ff6b6b;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 0 10px #ff6b6baa;
+    transition: background 0.3s ease;
+  }
+  button:disabled {
+    background: #555;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  button:hover:not(:disabled) {
+    background: #ff4b4b;
+  }
+  #message {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    min-height: 1.5rem;
+  }
+  #cards-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+  .card {
+    width: 80px;
+    height: 120px;
+    background: #222;
+    border-radius: 12px;
+    box-shadow: 0 0 10px #000;
+    perspective: 1000px;
+    cursor: pointer;
+    position: relative;
+  }
+  .card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+    border-radius: 12px;
+  }
+  .card.flipped .card-inner {
+    transform: rotateY(180deg);
+  }
+  .card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+  }
+  .card-front {
+    background: #444;
+    color: #fff;
+  }
+  .card-back {
+    background: #ff6b6b;
+    color: #fff;
+    transform: rotateY(180deg);
+    padding-top: 1.5rem;
+  }
+  #total-rewards {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  /* Responsiv Design */
+
+  @media (max-width: 768px){
+    h1 {
+      margin-top: 20px;
+      font-size: 2rem;
+      text-shadow: 0 0 10px #fff;
+    }
+
+    #quiz-container {
+   width: 80%;
+   margin-top: 70px;
+  }
+
+  #question {
+    font-size: 1.2rem;
+  }
+
+   #answer-input {
+    width: 95%;
+  }
+
+   button {
+    background: #ff6b6b;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.5rem;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 0 10px #ff6b6baa;
+    transition: background 0.3s ease;
+  }
+
+   #total-rewards {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  }
+
+</style>
+</head>
+<body>
+<!-- Video Background -->
+<video class="video-background" autoplay muted loop playsinline>
+  <source src="background.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+<h1>Mystery Card Quiz Game</h1>
+<div id="quiz-container">
+  <div id="question">Loading question...</div>
+  <input type="text" id="answer-input" placeholder="Type your answer here" autocomplete="off" />
+  <div id="buttons">
+    <button id="show-answer-btn" disabled>Show Answer (2:00)</button>
+    <button id="skip-question-btn">Skip Question</button>
+    <button id="next-question-btn" disabled>Next Question</button>
+  </div>
+  <div id="message"></div>
+  <div id="cards-container"></div>
+  <div id="total-rewards"></div>
+</div>
+
+<script>
+  const questions = [
+    { q: "What is the capital of France?", a: "paris" },
+    { q: "What is 5 + 7?", a: "12" },
+    { q: "What color do you get when you mix red and white?", a: "pink" },
+    { q: "What is the largest planet in our solar system?", a: "jupiter" },
+    { q: "What is the boiling point of water in Celsius?", a: "100" },
+    { q: "Who wrote 'Romeo and Juliet'?", a: "shakespeare" },
+    { q: "What is the chemical symbol for gold?", a: "au" },
+    { q: "What year did the first man land on the moon?", a: "1969" },
+    { q: "What is the tallest mountain in the world?", a: "everest" },
+    { q: "What is the currency of Japan?", a: "yen" }
+  ];
+
+  const rewards = [
+    { icon: "💰", label: "Coins", min: 100, max: 1000 },
+    { icon: "⭐", label: "Stars", min: 1, max: 5 },
+    { icon: "🎉", label: "Bonus Points", min: 50, max: 200 },
+    { icon: "🏆", label: "Jackpot", min: 1, max: 1 }
+  ];
+
+  let currentQuestionIndex = 0;
+  let totalRewards = [];
+  let showAnswerTimer = null;
+  let showAnswerSeconds = 60;
+  let autoAdvanceTimer = null;
+
+  // Check if user is logged in
+  const token = localStorage.getItem('authToken');
+  if (!token) {
+      showAnswerBtn.disabled = true;
+      skipQuestionBtn.disabled = true;
+      messageEl.textContent = 'Please login to play!';
+      messageEl.style.color = 'red';
+  } else {
+      loadUserStats();
+  }
+
+  const questionEl = document.getElementById("question");
+  const answerInput = document.getElementById("answer-input");
+  const showAnswerBtn = document.getElementById("show-answer-btn");
+  const skipQuestionBtn = document.getElementById("skip-question-btn");
+  const nextQuestionBtn = document.getElementById("next-question-btn");
+  const messageEl = document.getElementById("message");
+  const cardsContainer = document.getElementById("cards-container");
+  const totalRewardsEl = document.getElementById("total-rewards");
+
+  async function loadUserStats() {
+      try {
+          const response = await fetch('http://localhost:3000/api/user-stats', {
+              headers: { 'Authorization': 'Bearer ' + token }
+          });
+          if (response.ok) {
+              const stats = await response.json();
+              // Display stats if needed
+              console.log('User stats:', stats);
+          }
+      } catch (error) {
+          console.error('Error loading user stats:', error);
+      }
+  }
+
+  async function updateStats(reward) {
+      try {
+          const response = await fetch('http://localhost:3000/api/update-stats', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ' + token
+              },
+              body: JSON.stringify({ reward, gameType: 'qa' })
+          });
+          if (response.ok) {
+              console.log('Stats updated successfully');
+          } else {
+              console.error('Failed to update stats');
+          }
+      } catch (error) {
+          console.error('Error updating stats:', error);
+      }
+  }
+
+  function startShowAnswerTimer() {
+    showAnswerSeconds = 60;
+    showAnswerBtn.disabled = true;
+    showAnswerBtn.textContent = `Show Answer (1:00)`;
+    showAnswerTimer = setInterval(() => {
+      showAnswerSeconds--;
+      const minutes = Math.floor(showAnswerSeconds / 60);
+      const seconds = showAnswerSeconds % 60;
+      showAnswerBtn.textContent = `Show Answer (${minutes}:${seconds.toString().padStart(2, "0")})`;
+      if (showAnswerSeconds <= 0) {
+        clearInterval(showAnswerTimer);
+        showAnswerBtn.disabled = false;
+        showAnswerBtn.textContent = "Show Answer";
+      }
+    }, 1000);
+  }
+
+  function displayQuestion() {
+    const q = questions[currentQuestionIndex];
+    questionEl.textContent = `Q${currentQuestionIndex + 1}: ${q.q}`;
+    answerInput.value = "";
+    answerInput.disabled = false;
+    messageEl.textContent = "";
+    nextQuestionBtn.disabled = true;
+    cardsContainer.innerHTML = "";
+    showAnswerBtn.disabled = true;
+    if (currentQuestionIndex >= questions.length) {
+      skipQuestionBtn.style.display = "none";
+    } else {
+      skipQuestionBtn.style.display = "inline-block";
+    }
+    startShowAnswerTimer();
+    if (autoAdvanceTimer) clearTimeout(autoAdvanceTimer);
+    autoAdvanceTimer = setTimeout(() => {
+      nextQuestion();
+    }, 60000);
+  }
+
+  function createCard(reward, label) {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="card-inner">
+        <div class="card-front">${label}</div>
+        <div class="card-back">${reward.icon} ${reward.label} ${reward.min === reward.max ? reward.min : reward.min + "-" + reward.max}</div>
+      </div>
+    `;
+    card.addEventListener("click", () => {
+      if (card.classList.contains("flipped")) return;
+      card.classList.add("flipped");
+      revealReward(card, reward, label);
+    });
+    return card;
+  }
+
+  async function revealReward(card, reward, label) {
+    // 20% chance for "Better luck next time"
+    if (Math.random() < 0.2) {
+      // Update card back to show "Better luck next time"
+      const cardBack = card.querySelector('.card-back');
+      cardBack.textContent = "Better luck next time";
+      cardBack.style.fontSize = "1rem";
+      cardBack.style.padding = "0.5rem";
+      cardBack.style.textAlign = "center";
+      messageEl.textContent = "Better luck next time! Try again on the next question.";
+      messageEl.style.color = "#ff6b6b";
+    } else {
+      // Randomize actual reward amount within min-max
+      const amount = reward.min === reward.max ? reward.min : Math.floor(Math.random() * (reward.max - reward.min + 1)) + reward.min;
+      totalRewards.push({ label: reward.label, amount });
+
+      // Update card back to show only the coin value
+      const cardBack = card.querySelector('.card-back');
+      cardBack.textContent = amount.toLocaleString();
+      cardBack.style.fontSize = "2rem";
+      cardBack.style.padding = "0";
+      cardBack.style.textAlign = "center";
+
+      messageEl.textContent = "";
+
+
+
+
+    }
+    // Disable all other cards
+    Array.from(cardsContainer.children).forEach(c => {
+      if (c !== card) c.style.pointerEvents = "none";
+    });
+    // Show result for 3 seconds before enabling next question
+    setTimeout(() => {
+      nextQuestionBtn.disabled = false;
+    }, 3000);
+  }
+
+  function showAnswer() {
+    const q = questions[currentQuestionIndex];
+    clearTimeout(autoAdvanceTimer);
+    messageEl.textContent = `Answer: ${q.a}`;
+  }
+
+  function nextQuestion() {
+    if (autoAdvanceTimer) clearTimeout(autoAdvanceTimer);
+    currentQuestionIndex++;
+    if (currentQuestionIndex >= questions.length) {
+      endQuiz();
+    } else {
+      displayQuestion();
+    }
+  }
+
+  function endQuiz() {
+    questionEl.textContent = "Quiz Completed!";
+    answerInput.style.display = "none";
+    showAnswerBtn.style.display = "none";
+    skipQuestionBtn.style.display = "none";
+    nextQuestionBtn.style.display = "none";
+    cardsContainer.innerHTML = "";
+    let summary = "Total Rewards Collected:\n";
+    const rewardSummary = {};
+    totalRewards.forEach(r => {
+      rewardSummary[r.label] = (rewardSummary[r.label] || 0) + r.amount;
+    });
+    for (const [label, amount] of Object.entries(rewardSummary)) {
+      summary += `${label}: ${amount}\n`;
+    }
+    totalRewardsEl.textContent = summary.replace(/\n/g, " | ");
+  }
+
+  function checkAnswer() {
+    const userAnswer = answerInput.value.trim().toLowerCase();
+    const correctAnswer = questions[currentQuestionIndex].a.toLowerCase();
+    if (userAnswer === correctAnswer) {
+      clearTimeout(autoAdvanceTimer);
+      skipQuestionBtn.style.display = "none";
+      messageEl.textContent = "Correct! Pick a mystery card to reveal your reward.";
+      answerInput.disabled = true;
+      showAnswerBtn.disabled = true;
+      nextQuestionBtn.disabled = true;
+      displayMysteryCards();
+      if (autoAdvanceTimer) clearTimeout(autoAdvanceTimer);
+    } else {
+      messageEl.textContent = "Incorrect. Try again or wait to see the answer.";
+    }
+  }
+
+  function displayMysteryCards() {
+    cardsContainer.innerHTML = "";
+    // Show 5 mystery cards with random rewards and labels A-E
+    const labels = ['A', 'B', 'C', 'D', 'E'];
+
+    // Generate random reward ranges for each card dynamically
+    const cardRewards = [
+      { icon: "💰", label: "Coins", min: getRandomInt(0, 500), max: getRandomInt(501, 1000) },
+      { icon: "💰", label: "Coins", min: getRandomInt(1000, 1500), max: getRandomInt(1501, 2000) },
+      { icon: "💰", label: "Coins ", min: getRandomInt(1500, 1750), max: getRandomInt(1751, 2000) },
+      { icon: "💰", label: "Coins", min: getRandomInt(2000, 2500), max: getRandomInt(2501, 3000) },
+      { icon: "💰", label: "Coins", min: getRandomInt(1000, 3000), max: getRandomInt(3001, 5000) }
+    ];
+
+    for (let i = 0; i < labels.length; i++) {
+      // Ensure min is less than max for each card
+      if (cardRewards[i].min > cardRewards[i].max) {
+        const temp = cardRewards[i].min;
+        cardRewards[i].min = cardRewards[i].max;
+        cardRewards[i].max = temp;
+      }
+      const card = createCard(cardRewards[i], labels[i]);
+      cardsContainer.appendChild(card);
+    }
+  }
+
+  // Helper function to get random integer between min and max inclusive
+  function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  answerInput.addEventListener("input", () => {
+    messageEl.textContent = "";
+    if (answerInput.value.trim().length > 0) {
+      checkAnswer();
+    } else {
+      messageEl.textContent = "";
+    }
+  });
+
+  showAnswerBtn.addEventListener("click", () => {
+    showAnswer();
+  });
+
+  skipQuestionBtn.addEventListener("click", () => {
+    nextQuestion();
+  });
+
+  nextQuestionBtn.addEventListener("click", () => {
+    nextQuestion();
+  });
+
+  // Initialize
+  displayQuestion();
+</script>
+</body>
+</html>

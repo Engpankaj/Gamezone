@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Spin Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        @media (max-width: 768px) {
+            body {
+                height: auto;
+                padding: 20px;
+            }
+            .container {
+                width: 100%;
+                padding: 10px;
+            }
+            .welcome h1 {
+                font-size: 2em;
+                margin-bottom: 15px;
+            }
+            .welcome p {
+                font-size: 1.2em;
+            }
+            .welcome input {
+                width: 90%;
+                padding: 12px;
+                font-size: 1em;
+                border-radius: 10px;
+                margin-bottom: 10px;
+            }
+
+            .wheel-container {
+                margin-top: 120px;
+            }
+            .welcome button {
+                width: 100%;
+                height: 50px;
+                font-size: 1.1em;
+                border-radius: 10px;
+            }
+            .wheel {
+                margin-top: 100px;
+                width: 250px;
+                height: 250px;
+            }
+            .spin-btn {
+                width: 70px;
+                height: 70px;
+                font-size: 1em;
+            }
+            .countdown {
+                font-size: 2em;
+            }
+            .result {
+                font-size: 1.5em;
+            }
+        }
+
+        /* Video Background Styles */
+        .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+        .container {
+            text-align: center;
+            position: relative;
+        }
+        .welcome {
+            display: block;
+        }
+        .welcome h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .welcome p {
+            font-size: 30px;
+        }
+        .welcome input {
+            padding: 15px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+
+    .welcome button {
+    width: 160px;             
+    height: 55px;             
+    background: linear-gradient(45deg, #ff512f, #dd2476);
+    color: white;            
+    font-size: 20px;         
+    font-weight: bold;        
+    border: none;             
+    border-radius: 12px;      
+    cursor: pointer;         
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease; 
+}
+
+.welcome button:hover {
+    background: linear-gradient(45deg, #24c6dc, #514a9d); 
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+        .start-btn-container {
+            margin-bottom: 20px;
+        }
+        .wheel-container {
+            /* margin-top: 100px; */
+            display: none;
+            position: relative;
+        }
+        .wheel {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            position: relative;
+            margin: 0 auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .wheel svg {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+        .spin-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            font-size: 1.2em;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+        .spin-btn:hover {
+            background: #ff5252;
+        }
+        .arrow {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #ffeb3b;
+            z-index: 20;
+        }
+        .countdown {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            display: none;
+        }
+        .result {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 0;
+            font-size: 2em;
+            display: none;
+        }
+        .result.glow {
+            text-shadow: 0 0 10px #ffeb3b, 0 0 20px #ffeb3b;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .spinning {
+            animation: spin 0.3s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Video Background -->
+    <video class="video-background" autoplay muted loop playsinline>
+        <source src="background.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <div class="container">
+        <div class="welcome">
+            <h1>Welcome to Battel Lucky Spin Game</h1>
+            <p>Please enter your battle lead value.</p>
+            <input type="number" id="battleLead" placeholder="Enter value"><br>
+            <button onclick="startGame()">Go To Spin</button>
+        </div>
+        <div class="wheel-container">
+            <div class="arrow"></div>
+            <div class="wheel" id="wheel">
+                <svg viewBox="0 0 300 300">
+                    <!-- Wheel sectors will be generated here -->
+                </svg>
+            </div>
+            <button class="spin-btn" onclick="spin(event)">SPIN</button>
+            <div class="countdown" id="countdown"></div>
+            <div class="result" id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        let wheelData = {};
+        let currentAngle = 0;
+        let spinning = false;
+
+        // Check if user is logged in
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            document.querySelector('.welcome button').disabled = true;
+            document.querySelector('.welcome p').textContent = 'Please login to play!';
+            document.querySelector('.welcome p').style.color = 'red';
+        } else {
+            loadUserStats();
+        }
+
+        async function loadUserStats() {
+            try {
+                const response = await fetch('http://localhost:3000/api/user-stats', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.ok) {
+                    const stats = await response.json();
+                    // Display stats if needed
+                    console.log('User stats:', stats);
+                }
+            } catch (error) {
+                console.error('Error loading user stats:', error);
+            }
+        }
+
+        async function updateStats(reward) {
+            try {
+                const response = await fetch('http://localhost:3000/api/update-stats', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ reward, gameType: 'battle' })
+                });
+                if (response.ok) {
+                    console.log('Stats updated successfully');
+                } else {
+                    console.error('Failed to update stats');
+                }
+            } catch (error) {
+                console.error('Error updating stats:', error);
+            }
+        }
+
+
+
+        function startGame() {
+            const value = parseInt(document.getElementById('battleLead').value);
+            if (isNaN(value) || value < 20000) {
+                alert('Please enter a valid battle lead value (20,000 or more).');
+                return;
+            }
+
+            document.querySelector('.welcome').style.display = 'none';
+            document.querySelector('.wheel-container').style.display = 'block';
+
+            if (value >= 20000 && value <= 50000) {
+                wheelData = {
+                    rewards: ['5k Coins', 'Sorry', '8k Coins', '10k Coins', '15k Coins'],
+                    probabilities: [0.3, 0.3, 0.3, 0.05, 0.05],
+                    colors: ['#3498db', '#e74c3c', '#f39c12', '#9b59b6', '#1abc9c'],
+                    theme: 'blue'
+                };
+            } else if (value >= 50001 && value <= 100000) {
+                wheelData = {
+                    rewards: ['10k Coins', 'Sorry', '15k Coins', '20k Coins', '30k Coins'],
+                    probabilities: [0.32, 0.32, 0.32, 0.02, 0.02],
+                    colors: ['#27ae60', '#e67e22', '#f1c40f', '#8e44ad', '#16a085'],
+                    theme: 'green'
+                };
+            } else if (value >= 100001 && value <= 500000) {
+                wheelData = {
+                    rewards: ['15k Coins', 'Sorry', '25k Coins', '50k Coins', '100k Coins'],
+                    probabilities: [0.32, 0.32, 0.32, 0.02, 0.02],
+                    colors: ['#c0392b', '#d35400', '#f39c12', '#8e44ad', '#27ae60'],
+                    theme: 'red'
+                };
+            } else {
+                alert('Battle lead value out of range. Please enter a value between 20,000 and 500,000.');
+                document.querySelector('.welcome').style.display = 'block';
+                document.querySelector('.wheel-container').style.display = 'none';
+                return;
+            }
+
+            generateWheel();
+        }
+
+        function generateWheel() {
+            const svg = document.querySelector('#wheel svg');
+            svg.innerHTML = '';
+            const centerX = 150;
+            const centerY = 150;
+            const radius = 140;
+            let startAngle = 0;
+
+            wheelData.rewards.forEach((reward, index) => {
+                const angle = 360 / wheelData.rewards.length;
+                const endAngle = startAngle + angle;
+                const pathData = describeArc(centerX, centerY, radius, startAngle, endAngle);
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', pathData);
+                path.setAttribute('fill', wheelData.colors[index]);
+                path.setAttribute('stroke', '#fff');
+                path.setAttribute('stroke-width', '2');
+
+                const textAngle = startAngle + angle / 2;
+                const textX = centerX + (radius - 30) * Math.cos((textAngle - 90) * Math.PI / 180);
+                const textY = centerY + (radius - 30) * Math.sin((textAngle - 90) * Math.PI / 180);
+
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', textX);
+                text.setAttribute('y', textY);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('dominant-baseline', 'middle');
+                text.setAttribute('fill', 'white');
+                text.setAttribute('font-size', '12');
+                text.textContent = reward;
+
+                svg.appendChild(path);
+                svg.appendChild(text);
+
+                startAngle = endAngle;
+            });
+        }
+
+        function describeArc(x, y, radius, startAngle, endAngle) {
+            const start = polarToCartesian(x, y, radius, endAngle);
+            const end = polarToCartesian(x, y, radius, startAngle);
+            const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
+            const d = [
+                'M', start.x, start.y,
+                'A', radius, radius, 0, largeArcFlag, 0, end.x, end.y,
+                'L', x, y,
+                'Z'
+            ].join(' ');
+            return d;
+        }
+
+        function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+            const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+            return {
+                x: centerX + (radius * Math.cos(angleInRadians)),
+                y: centerY + (radius * Math.sin(angleInRadians))
+            };
+        }
+
+        function spin(event) {
+            event.preventDefault();
+            if (spinning) return;
+            spinning = true;
+
+            const wheel = document.getElementById('wheel');
+            const countdown = document.getElementById('countdown');
+            const result = document.getElementById('result');
+            const spinBtn = document.querySelector('.spin-btn');
+
+            result.style.display = 'none';
+            result.textContent = ''; // Clear previous result
+            countdown.style.display = 'block';
+            spinBtn.disabled = true; // Disable spin button
+
+            let timeLeft = 5;
+            countdown.textContent = timeLeft;
+
+            const timer = setInterval(() => {
+                timeLeft--;
+                countdown.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    countdown.style.display = 'none';
+                    stopSpin();
+                }
+            }, 1000);
+
+            // Slow down spin speed for smoother effect
+            wheel.style.animationDuration = '0.6s';
+            wheel.classList.add('spinning');
+        }
+
+        async function stopSpin() {
+            const wheel = document.getElementById('wheel');
+            const result = document.getElementById('result');
+
+            wheel.classList.remove('spinning');
+
+            // Select random reward based on probabilities
+            const random = Math.random();
+            let cumulative = 0;
+            let selectedIndex = 0;
+            for (let i = 0; i < wheelData.probabilities.length; i++) {
+                cumulative += wheelData.probabilities[i];
+                if (random <= cumulative) {
+                    selectedIndex = i;
+                    break;
+                }
+            }
+
+            const selectedReward = wheelData.rewards[selectedIndex];
+            const anglePerSector = 360 / wheelData.rewards.length;
+            const targetAngle = selectedIndex * anglePerSector + anglePerSector / 2;
+            const finalAngle = 360 * 5 + (360 - targetAngle); // 5 full rotations + adjustment
+
+            wheel.style.transform = `rotate(${finalAngle}deg)`;
+            wheel.style.transition = 'transform 4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+
+            // Show result instantly when spin stops
+            if (selectedReward === 'Sorry') {
+                result.textContent = 'Ohh sorry! Better luck next time';
+                await updateStats(0);
+            } else {
+                result.textContent = `Congratulations! You won: ${selectedReward}`;
+                const rewardValue = parseInt(selectedReward.replace('k Coins', '000').replace(' Coins', ''));
+                await updateStats(rewardValue);
+            }
+            result.classList.add('glow');
+            result.style.display = 'block';
+            spinning = false;
+            document.querySelector('.spin-btn').disabled = false; // Enable spin button
+
+            // Hide result after 3 seconds
+            setTimeout(() => {
+                result.classList.remove('glow');
+                result.style.display = 'none';
+                result.textContent = '';
+                location.reload();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

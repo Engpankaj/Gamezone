@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Leader Board - Game Arena</title>
+    <link rel="stylesheet" href="leaderboard.css" />
+</head>
+<body>
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="leaderboard-container">
+            <h1>Leader Board</h1>
+            <div class="reset-timer">
+                <div class="timer-display">
+                    <span id="timer-text"> Next Reset: 01:00</span>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Username</th>
+                            <th>Games</th>
+                            <th>Played</th>
+                            <th>Total Coins</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <!-- Leaderboard data will be populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let countdownInterval;
+        let timeLeft = 600; // 10 minutes in seconds
+        let endTime;
+
+        async function loadLeaderboard() {
+            try {
+                const response = await fetch('http://localhost:3000/api/leaderboard');
+                if (response.ok) {
+                    const data = await response.json();
+                    const leaderboardBody = document.getElementById('leaderboard-body');
+                    leaderboardBody.innerHTML = '';
+
+                    data.leaderboard.forEach(user => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${user.rank}</td>
+                            <td>${user.username}</td>
+                            <td>${user.differentGames}</td>
+                            <td>${user.gamesPlayed}</td>
+                            <td>${user.totalCoins}</td>
+                        `;
+                        leaderboardBody.appendChild(row);
+                    });
+                } else {
+                    console.error('Failed to load leaderboard');
+                }
+            } catch (error) {
+                console.error('Error loading leaderboard:', error);
+            }
+        }
+
+        async function resetLeaderboard() {
+            try {
+                const response = await fetch('http://localhost:3000/api/reset-leaderboard', {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    loadLeaderboard();
+                    resetTimer();
+                } else {
+                    console.error('Failed to reset leaderboard');
+                }
+            } catch (error) {
+                console.error('Error resetting leaderboard:', error);
+            }
+        }
+
+        function updateTimer() {
+            const now = Date.now();
+            timeLeft = Math.max(0, Math.ceil((endTime - now) / 1000));
+
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const timerText = document.getElementById('timer-text');
+            timerText.textContent = `Reset In: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            if (timeLeft <= 0) {
+                resetLeaderboard();
+            }
+        }
+
+        function resetTimer() {
+            timeLeft = 600;
+            endTime = Date.now() + timeLeft * 1000;
+            localStorage.setItem('leaderboardEndTime', endTime);
+            // Update display immediately without decrementing
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const timerText = document.getElementById('timer-text');
+            timerText.textContent = `Reset In: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            const savedEndTime = localStorage.getItem('leaderboardEndTime');
+            if (savedEndTime) {
+                endTime = parseInt(savedEndTime);
+                const now = Date.now();
+                if (endTime > now) {
+                    timeLeft = Math.ceil((endTime - now) / 1000);
+                } else {
+                    resetTimer();
+                }
+            } else {
+                resetTimer();
+            }
+            updateTimer();
+            countdownInterval = setInterval(updateTimer, 1000);
+        }
+
+        function pauseTimer() {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+        }
+
+        function resumeTimer() {
+            if (!countdownInterval) {
+                countdownInterval = setInterval(updateTimer, 1000);
+            }
+        }
+
+        // Load leaderboard when page loads
+        window.addEventListener('load', () => {
+            loadLeaderboard();
+            startTimer();
+        });
+
+        // Handle tab visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                pauseTimer();
+            } else {
+                resumeTimer();
+            }
+        });
+
+        // Refresh leaderboard every 30 seconds
+        setInterval(loadLeaderboard, 30000);
+    </script>
+</body>
+</html>

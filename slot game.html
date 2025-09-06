@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slot Machine Game - GameZone</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* Video Background Styles */
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        .game-container {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            padding: 1rem;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.3);
+            border: 3px solid gold;
+            max-width: 600px;
+            width: 95%;
+            text-align: center;
+        }
+
+        .game-title {
+            font-size: 2rem;
+            color: gold;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+            margin-bottom: 0.8rem;
+            font-weight: bold;
+        }
+
+        .win-up {
+             background: linear-gradient(135deg, #ffd700, #ffed4e);
+             color: #333;
+             padding: 0.8rem;
+             border-radius: 10px;
+             margin-bottom: 0.8rem;
+             font-weight: bold;
+             font-size: 1rem;
+             box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .balance-container {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #333;
+            padding: 0.8rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            font-weight: bold;
+            font-size: 1rem;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .input-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .number-input {
+            width: 100px;
+            padding: 0.8rem;
+            font-size: 1rem;
+            border: 2px solid gold;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-align: center;
+            margin-right: 0.8rem;
+        }
+
+        .input-label {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            display: block;
+            color: #ffd700;
+        }
+
+        .slot-machine {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            border: 4px solid gold;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .reels-container {
+            display: flex;
+            justify-content: center;
+            gap: 0.8rem;
+            margin-bottom: 1.2rem;
+            height: 90px;
+            position: relative;
+        }
+
+        .reel {
+            width: 60px;
+            height: 75px;
+            background: white;
+            border: 2px solid #ff6b6b;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #333;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .reel-item {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s ease-out;
+        }
+
+        .spin-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ff4757);
+            border: none;
+            color: white;
+            font-size: 1.3rem;
+            font-weight: bold;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.6);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .spin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 40px rgba(255, 107, 107, 0.8);
+        }
+
+        .spin-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-container {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 2px solid rgba(255, 215, 0, 0.5);
+        }
+
+        .reward-text {
+            font-size: 1.5rem;
+            color: #ffd700;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+        }
+
+
+
+        /* Animations */
+        @keyframes spin {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-1000px); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.9); }
+        }
+
+        @keyframes confetti {
+            0% { 
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% { 
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .spinning {
+            animation: spin 0.1s linear infinite;
+        }
+
+        .glowing {
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #ffd700, #4ecdc4, #45aaf2);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 1.5rem;
+            }
+            
+            .reel {
+                width: 60px;
+                height: 80px;
+                font-size: 2rem;
+            }
+            
+            .spin-btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 1.1rem;
+            }
+            
+            .number-input {
+                width: 100px;
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+
+             .reward-text {
+            font-size: 0.8rem;
+            color: #ffd700;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+        }
+
+        }
+
+        .jackpot-flash {
+            animation: jackpotFlash 0.5s ease-in-out infinite;
+        }
+
+        @keyframes jackpotFlash {
+            0%, 100% { 
+                background: linear-gradient(135deg, #ff6b6b, #ff4757);
+                box-shadow: 0 0 50px rgba(255, 107, 107, 0.8);
+            }
+            50% { 
+                background: linear-gradient(135deg, #ffd700, #ffed4e);
+                box-shadow: 0 0 70px rgba(255, 215, 0, 0.9);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Video Background -->
+    <video class="video-background" autoplay muted loop playsinline>
+        <source src="background.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <div class="game-container">
+        <h1 class="game-title">🎰 Lucky Slot Machine 🎰</h1><br>
+        
+        <div class="win-up">
+            <span>Win Up To 5K Coins</span>
+        </div>
+        <div class="balance-container">
+            <span>💰 Coin Balance: </span>
+            <span id="coinBalance">999</span>
+        </div>
+
+        <div class="input-container">
+            <label class="input-label">Enter Your Slot Range (1-999)</label>
+            <input type="number" id="numberInput" class="number-input" min="1" max="999" value="500">
+        </div>
+
+        <div class="slot-machine">
+            <div class="reels-container">
+                <div class="reel" id="reel1">
+                    <div class="reel-item">🍒</div>
+                    <div class="reel-item">🍋</div>
+                    <div class="reel-item">🍊</div>
+                    <div class="reel-item">⭐</div>
+                    <div class="reel-item">7️⃣</div>
+                </div>
+                <div class="reel" id="reel2">
+                    <div class="reel-item">🍒</div>
+                    <div class="reel-item">🍋</div>
+                    <div class="reel-item">🍊</div>
+                    <div class="reel-item">⭐</div>
+                    <div class="reel-item">7️⃣</div>
+                </div>
+                <div class="reel" id="reel3">
+                    <div class="reel-item">🍒</div>
+                    <div class="reel-item">🍋</div>
+                    <div class="reel-item">🍊</div>
+                    <div class="reel-item">⭐</div>
+                    <div class="reel-item">7️⃣</div>
+                </div>
+            </div>
+            
+            <button id="spinBtn" class="spin-btn">🎯 SPIN 🎯</button>
+        </div>
+
+        <div class="result-container">
+            <div id="rewardText" class="reward-text"></div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let coinBalance = 1000;
+
+        // Check if user is logged in
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            spinBtn.disabled = true;
+            rewardText.textContent = 'Please login to play!';
+            rewardText.style.color = 'red';
+        } else {
+            loadUserStats();
+        }
+
+        // DOM elements
+        const numberInput = document.getElementById('numberInput');
+        const spinBtn = document.getElementById('spinBtn');
+        const coinBalanceEl = document.getElementById('coinBalance');
+        const rewardText = document.getElementById('rewardText');
+        const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
+
+        // Initialize game
+        function initGame() {
+            updateBalanceDisplay();
+        }
+
+        // Update balance display
+        function updateBalanceDisplay() {
+            coinBalanceEl.textContent = coinBalance.toLocaleString();
+        }
+
+        async function loadUserStats() {
+            try {
+                const response = await fetch('http://localhost:3000/api/user-stats', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.ok) {
+                    const stats = await response.json();
+                    // Display stats if needed
+                    console.log('User stats:', stats);
+                }
+            } catch (error) {
+                console.error('Error loading user stats:', error);
+            }
+        }
+
+        async function updateStats(reward) {
+            try {
+                const response = await fetch('http://localhost:3000/api/update-stats', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ reward, gameType: 'slot' })
+                });
+                if (response.ok) {
+                    console.log('Stats updated successfully');
+                } else {
+                    console.error('Failed to update stats');
+                }
+            } catch (error) {
+                console.error('Error updating stats:', error);
+            }
+        }
+
+
+
+        // Calculate reward based on input number
+        function calculateReward(inputNumber) {
+            // 1% chance for jackpot
+            if (Math.random() < 0.01) {
+                return 10000; // Jackpot!
+            }
+
+            // Adjusted win probabilities based on input range
+            let winChance;
+            if (inputNumber >= 1 && inputNumber <= 350) {
+                winChance = 0.95; // 95% win chance
+            } else if (inputNumber >= 351 && inputNumber <= 700) {
+                winChance = 0.80; // 80% win chance
+            } else if (inputNumber >= 701 && inputNumber <= 999) {
+                winChance = 0.60; // 60% win chance
+            } else {
+                winChance = 0;
+            }
+
+            if (Math.random() > winChance) {
+                return 0; // No reward
+            }
+
+            if (inputNumber >= 1 && inputNumber <= 350) {
+                // 0-1500 reward range
+                return Math.floor(Math.random() * 1501);
+            } else if (inputNumber >= 351 && inputNumber <= 700) {
+                // 1501-3500 reward range
+                return Math.floor(Math.random() * 2000) + 1501;
+            } else if (inputNumber >= 701 && inputNumber <= 999) {
+                // 701-999 range with 10% chance for 4000-5000 reward
+                const chance = Math.random();
+                if (chance < 0.10) {
+                    // 4001-5000 rare reward
+                    return Math.floor(Math.random() * 1000) + 4001;
+                } else {
+                    // 3501-4000 more common reward
+                    return Math.floor(Math.random() * 500) + 3501;
+                }
+            }
+            return 0;
+        }
+
+        // Create confetti celebration
+        function createConfetti() {
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-10px';
+                confetti.style.animation = `confetti ${Math.random() * 3 + 2}s ease-out forwards`;
+                confetti.style.animationDelay = Math.random() * 1 + 's';
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => confetti.remove(), 5000);
+            }
+        }
+
+        // Play sound effect
+        function playSound(type) {
+            // Simple sound effects using Web Audio API
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            if (type === 'spin') {
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(50, audioContext.currentTime + 2);
+            } else if (type === 'win') {
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+                oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+                oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+            }
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        const symbols = ['🍒', '🍋', '🍊', '⭐', '7️⃣'];
+
+        // Spin the reels animation with cycling symbols
+        function spinReels() {
+            return new Promise((resolve) => {
+                const spinDuration = 3000; // 3 seconds
+                const spinInterval = 100; // change symbol every 100ms
+                let elapsed = 0;
+
+                const finalSymbols = [];
+
+                const intervalId = setInterval(() => {
+                    reels.forEach((reel, index) => {
+                        const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                        reel.textContent = randomSymbol;
+                    });
+                    elapsed += spinInterval;
+                    if (elapsed >= spinDuration) {
+                        clearInterval(intervalId);
+                        // Choose final symbols for each reel
+                        for (let i = 0; i < reels.length; i++) {
+                            const finalSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                            finalSymbols.push(finalSymbol);
+                            reels[i].textContent = finalSymbol;
+                        }
+                        resolve(finalSymbols);
+                    }
+                }, spinInterval);
+            });
+        }
+
+        // Handle spin button click
+        spinBtn.addEventListener('click', async function(event) {
+            event.preventDefault();
+            const inputNumber = parseInt(numberInput.value);
+
+            if (isNaN(inputNumber) || inputNumber < 1 || inputNumber > 999) {
+                rewardText.textContent = 'Please enter a valid number between 1 and 999!';
+                rewardText.style.color = '#ff6b6b';
+                return;
+            }
+
+            // Check if user has enough coins
+            const betAmount = parseInt(numberInput.value);
+            if (coinBalance < betAmount) {
+                rewardText.textContent = `Not enough coins! You need at least ${betAmount} coins to spin.`;
+                rewardText.style.color = '#ff6b6b';
+                return;
+            }
+
+            // Deduct coins
+            coinBalance -= betAmount;
+            updateBalanceDisplay();
+
+            // Disable spin button during animation
+            spinBtn.disabled = true;
+            rewardText.textContent = '';
+            rewardText.style.color = '#ffd700';
+
+            // Play spin sound
+            playSound('spin');
+
+            // Spin animation
+            spinReels().then(async () => {
+                const reward = calculateReward(inputNumber);
+                coinBalance += reward;
+
+                // Display result
+                if (reward === 10000) {
+                    rewardText.textContent = '🎉 JACKPOT! You won 10,000 coins! 🎉';
+                    spinBtn.classList.add('jackpot-flash');
+                    setTimeout(() => spinBtn.classList.remove('jackpot-flash'), 3000);
+                } else if (reward === 0) {
+                    rewardText.textContent = 'Better luck next time!';
+                    rewardText.style.color = '#ff6b6b';
+                } else {
+                    rewardText.textContent = `🎉 Congratulations! You won ${reward.toLocaleString()} coins!`;
+                    rewardText.style.color = '#ffd700';
+                }
+
+                updateBalanceDisplay();
+
+                // Update user stats
+                await updateStats(reward);
+
+                // Celebration effects
+                if (reward > 0) {
+                    playSound('win');
+                    createConfetti();
+                }
+
+                // Re-enable spin button
+                setTimeout(() => {
+                    spinBtn.disabled = false;
+                }, 3000);
+            });
+        });
+
+        // Initialize the game
+        initGame();
+    </script>
+</body>
+</html>

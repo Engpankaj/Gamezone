@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Arena - Ultimate Gaming Experience</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <div class="logo-icon">GZ</div>
+            <div class="logo-text">gamezone</div>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <ul class="nav-links desktop-nav">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="dice game.html">Dice Game</a></li>
+            <li><a href="slot game.html">Slot Game</a></li>
+            <li><a href="QA.html">Q/A Game</a></li>
+            <li><a href="battel.html">Battel Spin</a></li>
+            <li><a href="leader board.html">Leader Board</a></li>
+        </ul>
+
+        <!-- Profile Icon on Desktop -->
+        <div class="navbar-profile">
+            <div class="profile-logo" id="profileLogo">
+                <div class="profile-icon">👤</div>
+                <div class="profile-status" id="profileStatus">Login</div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div class="mobile-nav">
+            <!-- Burger Menu -->
+            <div class="burger-menu" id="burgerMenu">
+                <div class="burger-line"></div>
+                <div class="burger-line"></div>
+                <div class="burger-line"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Side Menu -->
+    <div class="side-menu" id="sideMenu">
+        <div class="side-menu-content">
+            <div class="side-menu-header">
+                <h3>Game Menu</h3>
+                <span class="close-menu" id="closeMenu">&times;</span>
+            </div>
+            <ul class="mobile-nav-links">
+                <li><a href="index.html">🏠 Home</a></li>
+                <li><a href="dice game.html">🎲 Dice Game</a></li>
+                <li><a href="slot game.html">🎰 Slot Game</a></li>
+                <li><a href="QA.html">❓ Q/A Game</a></li>
+                <li><a href="battel.html">⚔️ Battel Spin</a></li>
+                <li><a href="leader board.html">🏆 Leader Board</a></li>
+                <li class="mobile-profile-link">
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Video Background -->
+        <video class="video-background" autoplay muted loop playsinline>
+            <source src="background.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="game-arena-text">
+            <h1 class="game-arena">
+                <span class="letter">G</span>
+                <span class="letter">A</span>
+                <span class="letter">M</span>
+                <span class="letter">E</span>
+                <span class="letter">&nbsp;</span>
+                <span class="letter">A</span>
+                <span class="letter">R</span>
+                <span class="letter">E</span>
+                <span class="letter">N</span>
+                <span class="letter">A</span>
+            </h1>
+            <p class="subtitle">Where Champions Are Made</p>
+        </div>
+    </main>
+
+    <!-- Login/Signup Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <div class="auth-tabs">
+                <button class="tab-btn active" id="loginTab">Login</button>
+                <button class="tab-btn" id="signupTab">Sign Up</button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-form">
+                <h3>Login to Your Account</h3>
+                <form id="loginFormData">
+                    <div class="form-group">
+                        <label for="loginUserId">User ID:</label>
+                        <input type="text" id="loginUserId" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password:</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="auth-btn">Login</button>
+                </form>
+            </div>
+
+            <!-- Signup Form -->
+            <div id="signupForm" class="auth-form" style="display: none;">
+                <h3>Create New Account</h3>
+                <form id="signupFormData">
+                    <div class="form-group">
+                        <label for="signupUserId">User ID:</label>
+                        <input type="text" id="signupUserId" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupUsername">Username:</label>
+                        <input type="text" id="signupUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPassword">Password:</label>
+                        <input type="password" id="signupPassword" required>
+                    </div>
+                    <button type="submit" class="auth-btn">Sign Up</button>
+                </form>
+            </div>
+
+            <!-- Account Options (when logged in) -->
+            <div id="accountOptions" class="auth-form" style="display: none;">
+                <h3>Welcome, <span id="currentUsername"></span>!</h3>
+                <p>User ID: <span id="currentUserId"></span></p>
+                <button id="logoutBtn" class="auth-btn logout-btn">Logout</button>
+                <button id="deleteAccountBtn" class="auth-btn delete-btn">Delete Account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">GAMEZONE</div>
+            <ul class="footer-links">
+                <li><a href="#">Privacy Policy</a></li>
+                <li><a href="#">Terms of Service</a></li>
+                <li><a href="https://wa.me/917060874573" target="_blank">Support</a></li>
+                <li><a href="#">About Us</a></li>
+            </ul>
+        </div>
+        <div class="copyright">
+            © 2025 GameZone. Made By Pankaj.
+        </div>
+    </footer>
+
+    <script>
+        // Modal functionality
+        const modal = document.getElementById('authModal');
+        const profileLogo = document.getElementById('profileLogo');
+        const profileStatus = document.getElementById('profileStatus');
+
+        const closeModal = document.getElementById('closeModal');
+
+        // Tab switching
+        const loginTab = document.getElementById('loginTab');
+        const signupTab = document.getElementById('signupTab');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const accountOptions = document.getElementById('accountOptions');
+        const authTabs = document.querySelector('.auth-tabs');
+        // Forms
+        const loginFormData = document.getElementById('loginFormData');
+        const signupFormData = document.getElementById('signupFormData');
+
+        // Account management
+        const logoutBtn = document.getElementById('logoutBtn');
+        const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+        const currentUsername = document.getElementById('currentUsername');
+        const currentUserId = document.getElementById('currentUserId');
+
+        // Check if user is logged in on page load
+        async function fetchProfile() {
+            try {
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    updateProfileUI(null);
+                    return null;
+                }
+                const response = await fetch('http://localhost:3000/api/profile', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    updateProfileUI(data.user);
+                    return data.user;
+                } else {
+                    updateProfileUI(null);
+                    return null;
+                }
+            } catch (error) {
+                console.error('Error fetching profile:', error);
+                updateProfileUI(null);
+                return null;
+            }
+        }
+
+        let currentUser = null;
+        let profileLoaded = false;
+
+        async function initializeProfile() {
+            currentUser = await fetchProfile();
+            profileLoaded = true;
+        }
+
+        initializeProfile();
+
+        // Profile logo click
+        profileLogo.addEventListener('click', () => {
+            if (!profileLoaded) {
+                // Prevent interaction until profile is loaded
+                return;
+            }
+            if (currentUser) {
+                authTabs.style.display = 'none';
+                // Show account options
+                loginForm.style.display = 'none';
+                signupForm.style.display = 'none';
+                accountOptions.style.display = 'block';
+                loginTab.classList.remove('active');
+                signupTab.classList.remove('active');
+            } else {
+                authTabs.style.display = 'flex';
+                // Show login form
+                loginForm.style.display = 'block';
+                signupForm.style.display = 'none';
+                accountOptions.style.display = 'none';
+                loginTab.classList.add('active');
+                signupTab.classList.remove('active');
+            }
+            modal.style.display = 'block';
+        });
+
+        // Close modal
+        closeModal.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Tab switching
+        loginTab.addEventListener('click', () => {
+            loginForm.style.display = 'block';
+            signupForm.style.display = 'none';
+            accountOptions.style.display = 'none';
+            loginTab.classList.add('active');
+            signupTab.classList.remove('active');
+        });
+
+        signupTab.addEventListener('click', () => {
+            loginForm.style.display = 'none';
+            signupForm.style.display = 'block';
+            accountOptions.style.display = 'none';
+            loginTab.classList.remove('active');
+            signupTab.classList.add('active');
+        });
+
+        // Login form submission
+        loginFormData.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('loginUserId').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch('http://localhost:3000/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, password })
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('authToken', data.token);
+                    currentUser = data.user;
+                    updateProfileUI(currentUser);
+                    modal.style.display = 'none';
+                    alert('Login successful!');
+                    loginFormData.reset();
+                } else {
+                    const errorData = await response.json();
+                    alert(errorData.error || 'Login failed');
+                }
+            } catch (error) {
+                alert('Login failed: ' + error.message);
+            }
+        });
+
+        // Signup form submission
+        signupFormData.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('signupUserId').value;
+            const username = document.getElementById('signupUsername').value;
+            const password = document.getElementById('signupPassword').value;
+
+            try {
+                const response = await fetch('http://localhost:3000/api/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ userId, username, password })
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('authToken', data.token);
+                    currentUser = data.user;
+                    updateProfileUI(currentUser);
+                    modal.style.display = 'none';
+                    alert('Account created successfully!');
+                    signupFormData.reset();
+                    // Redirect to leaderboard page to show updated leaderboard
+                    window.location.href = 'leader board.html';
+                } else {
+                    const errorData = await response.json();
+                    alert(errorData.error || 'Signup failed');
+                }
+            } catch (error) {
+                alert('Signup failed: ' + error.message);
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', async () => {
+            localStorage.removeItem('authToken');
+            currentUser = null;
+            updateProfileUI(null);
+            modal.style.display = 'none';
+            alert('Logged out successfully!');
+        });
+
+        // Delete account
+        deleteAccountBtn.addEventListener('click', async () => {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone!')) {
+                try {
+                    const token = localStorage.getItem('authToken');
+                    const response = await fetch('http://localhost:3000/api/profile', {
+                        method: 'DELETE',
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    if (response.ok) {
+                        localStorage.removeItem('authToken');
+                        currentUser = null;
+                        updateProfileUI(null);
+                        modal.style.display = 'none';
+                        alert('Account deleted successfully!');
+                    } else {
+                        alert('Account deletion failed');
+                    }
+                } catch (error) {
+                    alert('Account deletion failed: ' + error.message);
+                }
+            }
+        });
+
+        function updateProfileUI(user) {
+            if (user) {
+                if (user.isAdmin) {
+                    profileStatus.textContent = "Admin";
+                } else {
+                    profileStatus.textContent = user.username;
+                }
+                currentUsername.textContent = user.username;
+                currentUserId.textContent = user.userId;
+                authTabs.style.display = 'none';
+            } else {
+                profileStatus.textContent = 'Login';
+                authTabs.style.display = 'flex';
+            }
+        }
+
+        // Burger menu functionality
+        const burgerMenu = document.getElementById('burgerMenu');
+        const sideMenu = document.getElementById('sideMenu');
+        const closeMenu = document.getElementById('closeMenu');
+
+        burgerMenu.addEventListener('click', () => {
+            sideMenu.classList.toggle('open');
+        });
+
+        closeMenu.addEventListener('click', () => {
+            sideMenu.classList.remove('open');
+        });
+
+        // Close menu when clicking outside
+        window.addEventListener('click', (event) => {
+            if (event.target === sideMenu) {
+                sideMenu.classList.remove('open');
+            }
+        });
+
+        // Close menu when clicking on a link
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav-links a');
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                sideMenu.classList.remove('open');
+            });
+        });
+    </script>
+</body>
+</html>

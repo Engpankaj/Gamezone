@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dice Reward Game</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: #333;
+            overflow: hidden;
+        }
+
+        /* Video Background Styles */
+        .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        .win-text {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #f04848;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .dice-display {
+            font-size: 8rem;
+            margin-bottom: 1rem;
+            user-select: none;
+            transition: transform 0.3s ease;
+        }
+        .reward-text {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            min-height: 2rem;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        button.roll-btn {
+            background: #ff6b6b;
+            border: none;
+            color: white;
+            font-size: 1.25rem;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(255,107,107,0.6);
+            transition: background 0.3s ease;
+        }
+        button.roll-btn:hover {
+            background: #ff4a4a;
+        }
+        @media (max-width: 768px) {
+            .win-text {
+                font-size: 1.5rem;
+            }
+            .dice-display {
+                font-size: 7rem;
+            }
+            .reward-text {
+                font-size: 1.25rem;
+            }
+            button.roll-btn {
+                font-size: 1rem;
+                padding: 0.8rem 1.5rem;
+            }
+        }
+        @media (max-width: 480px) {
+            .win-text {
+                font-size: 1.2rem;
+            }
+            .dice-display {
+                font-size: 6rem;
+            }
+            .reward-text {
+                font-size: 1rem;
+            }
+            button.roll-btn {
+                width: 100%;
+                padding: 1rem;
+                font-size: 1rem;
+            }
+            .game-container {
+                margin-bottom: 100px;
+                padding: 1.5rem;
+                width: 75%;
+            }
+        }
+        @media (max-width: 320px) {
+            .win-text {
+                font-size: 1rem;
+            }
+            .dice-display {
+                font-size: 5rem;
+            }
+            .game-container {
+                padding: 1rem;
+                width: 98%;
+            }
+        }
+        /* Dice roll animation */
+        .rolling {
+            animation: rollAnim 0.6s ease-in-out;
+        }
+        @keyframes rollAnim {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(360deg) scale(1.2); }
+            100% { transform: rotate(720deg) scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Video Background -->
+    <video class="video-background" autoplay muted loop playsinline>
+        <source src="background.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    
+    <div class="game-container">
+        <div class="win-text">Win up to 5k</div><br>
+        <div id="dice" class="dice-display" aria-live="polite" aria-atomic="true">🎲</div>
+        <div id="reward" class="reward-text" aria-live="polite" aria-atomic="true"></div>
+        <button id="rollBtn" class="roll-btn" type="button" aria-label="Roll the dice">Roll Dice</button>
+    </div>
+    
+    <!-- Audio element for dice roll sound -->
+    <audio id="diceSound" preload="auto">
+
+    <script>
+        const diceEl = document.getElementById('dice');
+        const rewardEl = document.getElementById('reward');
+        const rollBtn = document.getElementById('rollBtn');
+
+        // Check if user is logged in
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            rollBtn.disabled = true;
+            rewardEl.textContent = 'Please login to play!';
+            rewardEl.style.color = 'red';
+        } else {
+            loadUserStats();
+        }
+
+        // Rewards for each dice number
+        const rewardsMap = {
+            1: [500, 600, 750, 1000],
+            2: [200, 300, 400, 500],
+            3: [1000, 1200, 1500, 2000],
+            4: [850, 1800, 1550, 100],
+            5: [2500, 1250, 2000, 1400],
+            6: [700, 800, 900, 1000]
+        };
+
+        // To track last reward index for each dice number to avoid immediate repeats
+        const lastRewardIndex = {
+            1: -1,
+            2: -1,
+            3: -1,
+            4: -1,
+            5: -1,
+            6: -1
+        };
+
+        function getRandomReward(diceNum) {
+            const rewards = rewardsMap[diceNum];
+            let idx;
+            do {
+                idx = Math.floor(Math.random() * rewards.length);
+            } while (idx === lastRewardIndex[diceNum]);
+            lastRewardIndex[diceNum] = idx;
+            return rewards[idx];
+        }
+
+        async function loadUserStats() {
+            try {
+                const response = await fetch('http://localhost:3000/api/user-stats', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.ok) {
+                    const stats = await response.json();
+                    // Display stats if needed
+                    console.log('User stats:', stats);
+                }
+            } catch (error) {
+                console.error('Error loading user stats:', error);
+            }
+        }
+
+        async function updateStats(reward) {
+            try {
+                const response = await fetch('http://localhost:3000/api/update-stats', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ reward, gameType: 'dice' })
+                });
+                if (response.ok) {
+                    console.log('Stats updated successfully');
+                } else {
+                    console.error('Failed to update stats');
+                }
+            } catch (error) {
+                console.error('Error updating stats:', error);
+            }
+        }
+
+
+
+        async function rollDice(event) {
+            event.preventDefault();
+            if (!token) {
+                alert('Please login to play!');
+                return;
+            }
+            rollBtn.disabled = true;
+            diceEl.classList.add('rolling');
+            rewardEl.textContent = '';
+
+            setTimeout(async () => {
+                const diceNum = Math.floor(Math.random() * 6) + 1;
+                const reward = getRandomReward(diceNum);
+                diceEl.textContent = diceNum;
+                rewardEl.textContent = `You won ${reward} coins!`;
+                rewardEl.style.visibility = 'visible';
+                diceEl.classList.remove('rolling');
+                rollBtn.disabled = false;
+
+                // Update user stats
+                await updateStats(reward);
+
+                // Clear the result after 3 seconds
+                setTimeout(() => {
+                    rewardEl.textContent = '';
+                    rewardEl.style.visibility = 'hidden';
+                    diceEl.textContent = '🎲';
+                }, 3000);
+
+            }, 600);
+        }
+
+        rollBtn.addEventListener('click', rollDice);
+    </script>
+</body>
+</html>
