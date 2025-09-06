@@ -1,20 +1,17 @@
-- [x] Fix overflow in .leaderboard-container to enable vertical scrolling
-- [x] Add media query for laptop view to ensure scrollability
-- [x] Make reset-timer fixed at top and table scrollable below in laptop view
-- [x] Hide the scrollbar in laptop view
-- [x] Make table header (Rank, Username, etc.) fixed while rows scroll
-- [x] Fix the first table row (header) in its place
-- [x] Implement same scrolling in mobile view: page doesn't scroll, leaderboard and reset fixed, rest scrollable
-- [x] Fix leaderboard and reset in place, make below scrollable
-- [x] Enable page scrolling in mobile view
-- [x] Remove all mobile view code from leaderboard
-- [x] Move leaderboard CSS from styles.css to leaderboard.css
-- [x] Make leaderboard colorful and attractive with gradient backgrounds
-- [x] Add mobile view with same laptop functionality, hide games column, reduce padding/text
-- [x] Fix mobile view scrolling to match laptop view (sticky reset timer, scrollable table)
-- [x] Test the leaderboard scrolling in browser
-- [x] Add "Please login to play" message to slot game and Q/A game when user is not logged in
-- [x] Make index.html mobile-friendly with burger menu on right side containing all games and leaderboard, plus profile icon
-- [x] Make hamburger menu background transparent
-- [x] Make profile icon size smaller
-- [x] Hide burger menu from desktop view
+# MongoDB Integration Tasks
+
+- [x] Update package.json to add mongoose dependency
+- [x] Update server.js to integrate MongoDB connection and User model
+- [x] Replace fs operations with MongoDB queries in all routes
+- [x] Make all routes async/await
+- [ ] Test MongoDB connection (skipped - user requested to proceed)
+- [ ] Migrate existing users.json data to MongoDB
+- [ ] Verify all API endpoints work with MongoDB (skipped - user requested to proceed)
+
+# Fix Leaderboard in QA.html
+
+- [x] Add leaderboard section to QA.html
+- [x] Include leaderboard HTML structure and script from leader board.html
+- [x] Link leaderboard.css in QA.html
+- [x] Ensure leaderboard loads data from server
+- [ ] Test leaderboard display in QA.html

@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Mystery Card Quiz Game</title>
+<link rel="stylesheet" href="leaderboard.css" />
 <style>
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -210,12 +211,12 @@
     { q: "What is 5 + 7?", a: "12" },
     { q: "What color do you get when you mix red and white?", a: "pink" },
     { q: "What is the largest planet in our solar system?", a: "jupiter" },
-    { q: "What is the boiling point of water in Celsius?", a: "100" },
-    { q: "Who wrote 'Romeo and Juliet'?", a: "shakespeare" },
-    { q: "What is the chemical symbol for gold?", a: "au" },
-    { q: "What year did the first man land on the moon?", a: "1969" },
-    { q: "What is the tallest mountain in the world?", a: "everest" },
-    { q: "What is the currency of Japan?", a: "yen" }
+    { q: "Who was the first President of India?", a: "Dr Rajendra Prasad" },
+    { q: "What is the largest land animal?", a: "Elephant" },
+    { q: "Which company made the first personal computer?", a: "IBM" },
+    { q: "When did India win its first Cricket World Cup?", a: "1983" },
+    { q: "What is the capital of India?", a: "New Delhi" },
+    { q: "Who was the first actress in Indian cinema?", a: "Devika Rani" }
   ];
 
   const rewards = [
@@ -233,14 +234,6 @@
 
   // Check if user is logged in
   const token = localStorage.getItem('authToken');
-  if (!token) {
-      showAnswerBtn.disabled = true;
-      skipQuestionBtn.disabled = true;
-      messageEl.textContent = 'Please login to play!';
-      messageEl.style.color = 'red';
-  } else {
-      loadUserStats();
-  }
 
   const questionEl = document.getElementById("question");
   const answerInput = document.getElementById("answer-input");
@@ -250,6 +243,15 @@
   const messageEl = document.getElementById("message");
   const cardsContainer = document.getElementById("cards-container");
   const totalRewardsEl = document.getElementById("total-rewards");
+
+  if (!token) {
+      showAnswerBtn.disabled = true;
+      skipQuestionBtn.disabled = true;
+      messageEl.textContent = 'Please login to play!';
+      messageEl.style.color = 'red';
+  } else {
+      loadUserStats();
+  }
 
   async function loadUserStats() {
       try {
@@ -356,6 +358,9 @@
       // Randomize actual reward amount within min-max
       const amount = reward.min === reward.max ? reward.min : Math.floor(Math.random() * (reward.max - reward.min + 1)) + reward.min;
       totalRewards.push({ label: reward.label, amount });
+
+      // Update user stats
+      await updateStats(amount);
 
       // Update card back to show only the coin value
       const cardBack = card.querySelector('.card-back');
@@ -485,6 +490,127 @@
 
   // Initialize
   displayQuestion();
+
+  // Leaderboard functions
+  let countdownInterval;
+  let timeLeft = 600; // 10 minutes in seconds
+  let endTime;
+
+  async function loadLeaderboard() {
+      try {
+          const response = await fetch('http://localhost:3000/api/leaderboard');
+          if (response.ok) {
+              const data = await response.json();
+              const leaderboardBody = document.getElementById('leaderboard-body');
+              leaderboardBody.innerHTML = '';
+
+              data.leaderboard.forEach(user => {
+                  const row = document.createElement('tr');
+                  row.innerHTML = `
+                      <td>${user.rank}</td>
+                      <td>${user.username}</td>
+                      <td>${user.differentGames}</td>
+                      <td>${user.gamesPlayed}</td>
+                      <td>${user.totalCoins}</td>
+                  `;
+                  leaderboardBody.appendChild(row);
+              });
+          } else {
+              console.error('Failed to load leaderboard');
+          }
+      } catch (error) {
+          console.error('Error loading leaderboard:', error);
+      }
+  }
+
+  async function resetLeaderboard() {
+      try {
+          const response = await fetch('http://localhost:3000/api/reset-leaderboard', {
+              method: 'POST'
+          });
+          if (response.ok) {
+              loadLeaderboard();
+              resetTimer();
+          } else {
+              console.error('Failed to reset leaderboard');
+          }
+      } catch (error) {
+          console.error('Error resetting leaderboard:', error);
+      }
+  }
+
+  function updateTimer() {
+      const now = Date.now();
+      timeLeft = Math.max(0, Math.ceil((endTime - now) / 1000));
+
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      const timerText = document.getElementById('timer-text');
+      timerText.textContent = `Reset In: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+      if (timeLeft <= 0) {
+          resetLeaderboard();
+      }
+  }
+
+  function resetTimer() {
+      timeLeft = 600;
+      endTime = Date.now() + timeLeft * 1000;
+      localStorage.setItem('leaderboardEndTime', endTime);
+      // Update display immediately without decrementing
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      const timerText = document.getElementById('timer-text');
+      timerText.textContent = `Reset In: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  function startTimer() {
+      const savedEndTime = localStorage.getItem('leaderboardEndTime');
+      if (savedEndTime) {
+          endTime = parseInt(savedEndTime);
+          const now = Date.now();
+          if (endTime > now) {
+              timeLeft = Math.ceil((endTime - now) / 1000);
+          } else {
+              resetTimer();
+          }
+      } else {
+          resetTimer();
+      }
+      updateTimer();
+      countdownInterval = setInterval(updateTimer, 1000);
+  }
+
+  function pauseTimer() {
+      if (countdownInterval) {
+          clearInterval(countdownInterval);
+          countdownInterval = null;
+      }
+  }
+
+  function resumeTimer() {
+      if (!countdownInterval) {
+          countdownInterval = setInterval(updateTimer, 1000);
+      }
+  }
+
+  // Load leaderboard when page loads
+  window.addEventListener('load', () => {
+      loadLeaderboard();
+      startTimer();
+  });
+
+  // Handle tab visibility changes
+  document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+          pauseTimer();
+      } else {
+          resumeTimer();
+      }
+  });
+
+  // Refresh leaderboard every 30 seconds
+  setInterval(loadLeaderboard, 30000);
 </script>
 </body>
 </html>
