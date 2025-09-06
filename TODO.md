@@ -15,3 +15,10 @@
 - [x] Link leaderboard.css in QA.html
 - [x] Ensure leaderboard loads data from server
 - [ ] Test leaderboard display in QA.html
+
+# Fix API URLs in HTML Files
+
+- [x] Update QA.html to use relative API URLs (/api/ instead of http://localhost:3000/api/)
+- [x] Update battel.html to use relative API URLs (/api/ instead of http://localhost:3000/api/)
+- [x] Update leader board.html to use relative API URLs (/api/ instead of http://localhost:3000/api/)
+- [x] Ensure all fetch calls use relative paths for production deployment

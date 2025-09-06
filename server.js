@@ -7,12 +7,12 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 
 const app = express();
-const PORT = 3000;
-const JWT_SECRET = 'gamezone-jwt-secret-key'; // In production, use environment variable
+const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || 'gamezone-jwt-secret-key'; // Use environment variable
 
 // Middleware
 app.use(cors({
-  origin: ['http://127.0.0.1:5500', 'http://localhost:3000', 'http://localhost:5500'],
+  origin: ['http://127.0.0.1:5500', 'http://localhost:3000', 'http://localhost:5500', 'https://gamezone-liv5.onrender.com'],
   methods: ['GET', 'POST', 'DELETE', 'PUT', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -23,7 +23,8 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname)));
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/gamezone', {
+const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/gamezone';
+mongoose.connect(mongoURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => {
