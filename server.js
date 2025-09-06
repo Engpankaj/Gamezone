@@ -5,6 +5,9 @@ const path = require('path');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,12 +26,12 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname)));
 
 // MongoDB connection
-const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/gamezone';
+const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/gamezone';
 mongoose.connect(mongoURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => {
-  console.log('Connected to MongoDB');
+  console.log('MongoDB connected successfully');
 }).catch(err => {
   console.error('MongoDB connection error:', err);
 });

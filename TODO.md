@@ -22,3 +22,13 @@
 - [x] Update battel.html to use relative API URLs (/api/ instead of http://localhost:3000/api/)
 - [x] Update leader board.html to use relative API URLs (/api/ instead of http://localhost:3000/api/)
 - [x] Ensure all fetch calls use relative paths for production deployment
+
+# MongoDB Atlas Setup for Production
+
+- [x] Updated server.js to use dotenv and MONGO_URI environment variable
+- [x] Added dotenv dependency to package.json
+- [x] Created .env file with environment variable placeholders
+- [ ] Set up MongoDB Atlas account and cluster
+- [ ] Get connection string from Atlas and update .env file
+- [ ] Add MONGO_URI environment variable in Render dashboard
+- [ ] Test login/signup functionality on Render after MongoDB setup
