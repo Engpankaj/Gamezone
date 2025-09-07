@@ -12,7 +12,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'gamezone-jwt-secret-key'; // Use e
 
 // Middleware
 app.use(cors({
-  origin: ['http://127.0.0.1:5500', 'http://localhost:3000', 'http://localhost:5500', 'https://gamezone-liv5.onrender.com'],
+  origin: ['http://127.0.0.1:5500', 'http://127.0.0.1:5501', 'http://localhost:3000', 'http://localhost:5500', 'https://gamezone-liv5.onrender.com'],
   methods: ['GET', 'POST', 'DELETE', 'PUT', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
