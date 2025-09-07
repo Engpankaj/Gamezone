@@ -245,7 +245,7 @@
 
         async function loadUserStats() {
             try {
-                const response = await fetch('/api/user-stats', {
+                const response = await fetch('http://localhost:3000/api/user-stats', {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 if (response.ok) {
@@ -260,7 +260,7 @@
 
         async function updateStats(reward) {
             try {
-                const response = await fetch('/api/update-stats', {
+                const response = await fetch('http://localhost:3000/api/update-stats', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

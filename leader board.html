@@ -42,7 +42,7 @@
 
         async function loadLeaderboard() {
             try {
-                const response = await fetch('/api/leaderboard');
+                const response = await fetch('http://localhost:3000/api/leaderboard');
                 if (response.ok) {
                     const data = await response.json();
                     const leaderboardBody = document.getElementById('leaderboard-body');
@@ -69,7 +69,7 @@
 
         async function resetLeaderboard() {
             try {
-                const response = await fetch('/api/reset-leaderboard', {
+                const response = await fetch('http://localhost:3000/api/reset-leaderboard', {
                     method: 'POST'
                 });
                 if (response.ok) {

@@ -1,13 +1,10 @@
+require("dotenv").config();
 const express = require('express');
 const bodyParser = require('body-parser');
-const fs = require('fs');
 const path = require('path');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -105,15 +102,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Logout
-app.post('/api/logout', (req, res) => {
-  req.session.destroy(err => {
-    if (err) {
-      return res.status(500).json({ error: 'Logout failed' });
-    }
-    res.json({ message: 'Logged out successfully' });
-  });
-});
+
 
 // Get profile
 app.get('/api/profile', async (req, res) => {
