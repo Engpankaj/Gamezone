@@ -157,6 +157,9 @@
     </footer>
 
     <script>
+        // API base URL for local testing vs deployment
+        const API_BASE = window.location.hostname === '127.0.0.1' ? 'http://127.0.0.1:3000' : '';
+
         // Modal functionality
         const modal = document.getElementById('authModal');
         const profileLogo = document.getElementById('profileLogo');
@@ -189,7 +192,7 @@
                     updateProfileUI(null);
                     return null;
                 }
-                const response = await fetch('/api/profile', {
+                const response = await fetch(`${API_BASE}/api/profile`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 if (response.ok) {
@@ -278,7 +281,7 @@
             const password = document.getElementById('loginPassword').value;
 
             try {
-                const response = await fetch('/api/login', {
+                const response = await fetch(`${API_BASE}/api/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId, password })
@@ -308,7 +311,7 @@
             const password = document.getElementById('signupPassword').value;
 
             try {
-                const response = await fetch('/api/signup', {
+                const response = await fetch(`${API_BASE}/api/signup`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -347,7 +350,7 @@
             if (confirm('Are you sure you want to delete your account? This action cannot be undone!')) {
                 try {
                     const token = localStorage.getItem('authToken');
-                    const response = await fetch('/api/profile', {
+                    const response = await fetch(`${API_BASE}/api/profile`, {
                         method: 'DELETE',
                         headers: { 'Authorization': 'Bearer ' + token }
                     });

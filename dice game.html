@@ -149,6 +149,9 @@
     <audio id="diceSound" preload="auto">
 
     <script>
+        // API base URL for local testing vs deployment
+        const API_BASE = window.location.hostname === '127.0.0.1' ? 'http://127.0.0.1:3000' : '';
+
         const diceEl = document.getElementById('dice');
         const rewardEl = document.getElementById('reward');
         const rollBtn = document.getElementById('rollBtn');
@@ -195,7 +198,7 @@
 
         async function loadUserStats() {
             try {
-                const response = await fetch('/api/user-stats', {
+                const response = await fetch(`${API_BASE}/api/user-stats`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 if (response.ok) {
@@ -210,7 +213,7 @@
 
         async function updateStats(reward) {
             try {
-                const response = await fetch('/api/update-stats', {
+                const response = await fetch(`${API_BASE}/api/update-stats`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

@@ -206,6 +206,9 @@
 </div>
 
 <script>
+  // API base URL for local testing vs deployment
+  const API_BASE = window.location.hostname === '127.0.0.1' ? 'http://127.0.0.1:3000' : '';
+
   const questions = [
     { q: "What is the capital of France?", a: "paris" },
     { q: "What is 5 + 7?", a: "12" },
@@ -255,7 +258,7 @@
 
   async function loadUserStats() {
       try {
-          const response = await fetch('/api/user-stats', {
+          const response = await fetch(`${API_BASE}/api/user-stats`, {
               headers: { 'Authorization': 'Bearer ' + token }
           });
           if (response.ok) {
@@ -270,7 +273,7 @@
 
   async function updateStats(reward) {
       try {
-          const response = await fetch('/api/update-stats', {
+          const response = await fetch(`${API_BASE}/api/update-stats`, {
               method: 'POST',
               headers: {
                   'Content-Type': 'application/json',
@@ -498,7 +501,7 @@
 
   async function loadLeaderboard() {
       try {
-          const response = await fetch('/api/leaderboard');
+          const response = await fetch(`${API_BASE}/api/leaderboard`);
           if (response.ok) {
               const data = await response.json();
               const leaderboardBody = document.getElementById('leaderboard-body');
@@ -525,7 +528,7 @@
 
   async function resetLeaderboard() {
             try {
-          const response = await fetch('/api/reset-leaderboard', {
+          const response = await fetch(`${API_BASE}/api/reset-leaderboard`, {
               method: 'POST'
           });
           if (response.ok) {
@@ -554,28 +557,36 @@
   }
 
   function resetTimer() {
-      timeLeft = 600;
-      endTime = Date.now() + timeLeft * 1000;
-      localStorage.setItem('leaderboardEndTime', endTime);
-      // Update display immediately without decrementing
-      const minutes = Math.floor(timeLeft / 60);
-      const seconds = timeLeft % 60;
-      const timerText = document.getElementById('timer-text');
-      timerText.textContent = `Reset In: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      // Instead of creating local timer, fetch the global server timer
+      startTimer();
   }
 
-  function startTimer() {
-      const savedEndTime = localStorage.getItem('leaderboardEndTime');
-      if (savedEndTime) {
-          endTime = parseInt(savedEndTime);
-          const now = Date.now();
-          if (endTime > now) {
-              timeLeft = Math.ceil((endTime - now) / 1000);
+  async function startTimer() {
+      try {
+          const response = await fetch(`${API_BASE}/api/leaderboard-timer`);
+          if (response.ok) {
+              const data = await response.json();
+              endTime = data.endTime;
+              const now = Date.now();
+              if (endTime > now) {
+                  timeLeft = Math.ceil((endTime - now) / 1000);
+              } else {
+                  // If timer has expired, fetch again to get the updated server time
+                  console.log('Timer expired, fetching updated time...');
+                  setTimeout(() => startTimer(), 1000); // Wait 1 second and try again
+                  return;
+              }
           } else {
-              resetTimer();
+              console.error('Failed to fetch leaderboard timer');
+              // Retry after 2 seconds
+              setTimeout(() => startTimer(), 2000);
+              return;
           }
-      } else {
-          resetTimer();
+      } catch (error) {
+          console.error('Error fetching leaderboard timer:', error);
+          // Retry after 2 seconds
+          setTimeout(() => startTimer(), 2000);
+          return;
       }
       updateTimer();
       countdownInterval = setInterval(updateTimer, 1000);
@@ -605,7 +616,13 @@
       if (document.hidden) {
           pauseTimer();
       } else {
-          resumeTimer();
+          // When tab becomes visible, resume the timer from current time
+          if (!countdownInterval && endTime) {
+              resumeTimer();
+          } else if (!endTime) {
+              // If no timer exists, start a new one
+              startTimer();
+          }
       }
   });
 

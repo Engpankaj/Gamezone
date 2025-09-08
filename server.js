@@ -48,7 +48,37 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
+// Global leaderboard timer
+let leaderboardEndTime = null;
+const RESET_INTERVAL = 10 * 60 * 1000; // 10 minutes in milliseconds
 
+// Initialize or load leaderboard timer
+function initializeLeaderboardTimer() {
+  if (!leaderboardEndTime) {
+    leaderboardEndTime = Date.now() + RESET_INTERVAL;
+  }
+}
+
+function resetLeaderboardTimer() {
+  leaderboardEndTime = Date.now() + RESET_INTERVAL;
+}
+
+// Auto-reset leaderboard every 10 minutes
+setInterval(async () => {
+  try {
+    await User.updateMany({}, {
+      gamesPlayed: 0,
+      differentGames: 0,
+      totalReward: 0,
+      gamesPlayedTypes: [],
+      rank: 1
+    });
+    resetLeaderboardTimer();
+    console.log('Leaderboard auto-reset completed');
+  } catch (error) {
+    console.error('Auto-reset leaderboard error:', error);
+  }
+}, RESET_INTERVAL);
 
 // API Routes
 
@@ -285,12 +315,21 @@ app.post('/api/reset-leaderboard', async (req, res) => {
       gamesPlayedTypes: [],
       rank: 1
     });
+    resetLeaderboardTimer();
 
     res.json({ message: 'Leaderboard reset successfully, all users rank set to 1' });
   } catch (error) {
     console.error('Reset leaderboard error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
+});
+
+// Get current leaderboard timer
+app.get('/api/leaderboard-timer', (req, res) => {
+  if (!leaderboardEndTime) {
+    initializeLeaderboardTimer();
+  }
+  res.json({ endTime: leaderboardEndTime });
 });
 
 // Global error handler middleware
@@ -302,4 +341,5 @@ app.use((err, req, res, next) => {
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://0.0.0.0:${PORT}`);
+  initializeLeaderboardTimer();
 });
