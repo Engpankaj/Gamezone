@@ -90,10 +90,15 @@
             const now = Date.now();
             timeLeft = Math.max(0, Math.ceil((endTime - now) / 1000));
 
-            const minutes = Math.floor(timeLeft / 60);
+            const hours = Math.floor(timeLeft / 3600);
+            const minutes = Math.floor((timeLeft % 3600) / 60);
             const seconds = timeLeft % 60;
             const timerText = document.getElementById('timer-text');
-            timerText.textContent = `Reset In: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            if (hours > 0) {
+                timerText.textContent = `Reset In: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            } else {
+                timerText.textContent = `Reset In: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
 
             if (timeLeft <= 0) {
                 resetLeaderboard();

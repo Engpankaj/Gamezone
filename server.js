@@ -48,22 +48,44 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
+// Leaderboard Timer Schema
+const leaderboardTimerSchema = new mongoose.Schema({
+  endTime: { type: Number, required: true }
+});
+
+const LeaderboardTimer = mongoose.model('LeaderboardTimer', leaderboardTimerSchema);
+
 // Global leaderboard timer
 let leaderboardEndTime = null;
-const RESET_INTERVAL = 10 * 60 * 1000; // 10 minutes in milliseconds
+const RESET_INTERVAL = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
 
 // Initialize or load leaderboard timer
-function initializeLeaderboardTimer() {
-  if (!leaderboardEndTime) {
+async function initializeLeaderboardTimer() {
+  try {
+    let timerDoc = await LeaderboardTimer.findOne();
+    if (!timerDoc) {
+      leaderboardEndTime = Date.now() + RESET_INTERVAL;
+      timerDoc = new LeaderboardTimer({ endTime: leaderboardEndTime });
+      await timerDoc.save();
+    } else {
+      leaderboardEndTime = timerDoc.endTime;
+    }
+  } catch (error) {
+    console.error('Error initializing leaderboard timer:', error);
     leaderboardEndTime = Date.now() + RESET_INTERVAL;
   }
 }
 
-function resetLeaderboardTimer() {
-  leaderboardEndTime = Date.now() + RESET_INTERVAL;
+async function resetLeaderboardTimer() {
+  try {
+    leaderboardEndTime = Date.now() + RESET_INTERVAL;
+    await LeaderboardTimer.findOneAndUpdate({}, { endTime: leaderboardEndTime }, { upsert: true });
+  } catch (error) {
+    console.error('Error resetting leaderboard timer:', error);
+  }
 }
 
-// Auto-reset leaderboard every 10 minutes
+// Auto-reset leaderboard every 12 hours
 setInterval(async () => {
   try {
     await User.updateMany({}, {

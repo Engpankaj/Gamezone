@@ -180,6 +180,29 @@
             color: white;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             display: none;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        .reset-btn {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(45deg, #ff512f, #dd2476);
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            display: none;
+        }
+        .reset-btn:hover {
+            background: linear-gradient(45deg, #24c6dc, #514a9d);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
         }
         .result {
             position: absolute;
@@ -224,6 +247,8 @@
             </div>
             <button class="spin-btn" onclick="spin(event)">SPIN</button>
             <div class="countdown" id="countdown"></div>
+            <!-- Removed reset timer button as per user request -->
+            <!-- <button class="reset-btn" id="resetBtn" onclick="resetTimer()">RESET TIMER</button> -->
             <div class="result" id="result"></div>
         </div>
     </div>
@@ -384,6 +409,8 @@
             };
         }
 
+        // Removed unused timer and formatTime functions as reset timer is removed
+
         function spin(event) {
             event.preventDefault();
             if (spinning) return;
@@ -393,28 +420,24 @@
             const countdown = document.getElementById('countdown');
             const result = document.getElementById('result');
             const spinBtn = document.querySelector('.spin-btn');
+            // Removed resetBtn usage as reset timer is removed
 
             result.style.display = 'none';
             result.textContent = ''; // Clear previous result
             countdown.style.display = 'block';
+            // resetBtn.style.display = 'inline-block'; // Removed
+
             spinBtn.disabled = true; // Disable spin button
 
-            let timeLeft = 5;
-            countdown.textContent = timeLeft;
-
-            const timer = setInterval(() => {
-                timeLeft--;
-                countdown.textContent = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    countdown.style.display = 'none';
-                    stopSpin();
-                }
-            }, 1000);
+            // Removed timer and countdown logic since reset timer is removed
 
             // Slow down spin speed for smoother effect
             wheel.style.animationDuration = '0.6s';
             wheel.classList.add('spinning');
+
+            // Automatically stop spin after animation duration (0.6s)
+            // Changed to spin for at least 5 seconds before showing result
+            setTimeout(stopSpin, 5000);
         }
 
         async function stopSpin() {
@@ -464,6 +487,10 @@
                 result.textContent = '';
                 location.reload();
             }, 3000);
+        }
+
+        function resetTimer() {
+            // Removed reset timer functionality as per user request
         }
     </script>
 </body>
