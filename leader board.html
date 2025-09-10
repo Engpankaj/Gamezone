@@ -13,7 +13,7 @@
             <h1>Leader Board</h1>
             <div class="reset-timer">
                 <div class="timer-display">
-                    <span id="timer-text"> Reset In: 10:00</span>
+                    <span id="timer-text"> Reset In: Loading...</span>
                 </div>
             </div>
             <div class="table-wrapper">
@@ -40,7 +40,7 @@
         const API_BASE = window.location.hostname === '127.0.0.1' ? 'http://127.0.0.1:3000' : '';
 
         let countdownInterval;
-        let timeLeft = 600; // 10 minutes in seconds
+        let timeLeft;
         let endTime;
 
         async function loadLeaderboard() {
@@ -175,8 +175,8 @@
             }
         });
 
-        // Refresh leaderboard every 30 seconds
-        setInterval(loadLeaderboard, 30000);
+        // Refresh leaderboard every 10 seconds
+        setInterval(loadLeaderboard, 10000);
     </script>
 </body>
 </html>

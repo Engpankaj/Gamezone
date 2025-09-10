@@ -1,8 +1,5 @@
-# Code Cleanup Tasks
+# Leaderboard Timer Fix TODO
 
-- [x] Remove duplicate Gamezone/ directory as it contains outdated/duplicate files
-- [x] Remove unused dependencies from package.json: cookie-parser, express-session
-- [x] Verify all HTML files (dice game.html, slot game.html, etc.) for unused code
-- [x] Check CSS files for unused styles
-- [ ] Test website functionality after cleanup
-- [ ] Ensure deployment works after cleanup
+- [x] Edit leader board.html to fix timer display and remove 10-minute placeholder
+- [x] Edit Gamezone/leader board.html with the same fixes
+- [ ] Test the changes by loading the leaderboard page
