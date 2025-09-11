@@ -149,6 +149,30 @@
             }
             updateTimer();
             countdownInterval = setInterval(updateTimer, 1000);
+
+            // Periodically sync with server timer every 30 seconds to ensure synchronization
+            setTimeout(() => syncTimerWithServer(), 30000);
+        }
+
+        async function syncTimerWithServer() {
+            try {
+                const response = await fetch(`${API_BASE}/api/leaderboard-timer`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const serverEndTime = data.endTime;
+                    const now = Date.now();
+                    if (Math.abs(serverEndTime - endTime) > 1000) { // If difference > 1 second, sync
+                        console.log('Syncing timer with server');
+                        endTime = serverEndTime;
+                        timeLeft = Math.ceil((endTime - now) / 1000);
+                        updateTimer();
+                    }
+                }
+            } catch (error) {
+                console.error('Error syncing timer with server:', error);
+            }
+            // Continue syncing every 30 seconds
+            setTimeout(() => syncTimerWithServer(), 30000);
         }
 
         function pauseTimer() {
