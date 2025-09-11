@@ -329,13 +329,13 @@
     }, 60000);
   }
 
-  function createCard(reward, label) {
+    function createCard(reward, label) {
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `
       <div class="card-inner">
         <div class="card-front">${label}</div>
-        <div class="card-back">${reward.icon} ${reward.label} ${reward.min === reward.max ? reward.min : reward.min + "-" + reward.max}</div>
+        <div class="card-back">${reward.icon} ${reward.label}</div>
       </div>
     `;
     card.addEventListener("click", () => {
