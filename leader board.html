@@ -13,7 +13,7 @@
             <h1>Leader Board</h1>
             <div class="reset-timer">
                 <div class="timer-display">
-                    <span id="timer-text"> Reset In: Loading...</span>
+                    <span id="timer-text"> Reset In: 05:00</span>
                 </div>
             </div>
             <div class="table-wrapper">
@@ -90,15 +90,15 @@
             const now = Date.now();
             timeLeft = Math.max(0, Math.ceil((endTime - now) / 1000));
 
-            const hours = Math.floor(timeLeft / 3600);
+            const totalHours = Math.floor(timeLeft / 3600);
             const minutes = Math.floor((timeLeft % 3600) / 60);
             const seconds = timeLeft % 60;
+
+            // Convert to 12-hour format without AM/PM
+            const hours12 = totalHours % 12 || 12; // Convert 0 to 12
+
             const timerText = document.getElementById('timer-text');
-            if (hours > 0) {
-                timerText.textContent = `Reset In: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            } else {
-                timerText.textContent = `Reset In: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            }
+            timerText.textContent = `Reset In: ${hours12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
             if (timeLeft <= 0) {
                 resetLeaderboard();
@@ -106,11 +106,21 @@
         }
 
         function resetTimer() {
+            // Clear any existing interval before starting a new timer
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
             // Instead of creating local timer, fetch the global server timer
             startTimer();
         }
 
         async function startTimer() {
+            // Clear any existing interval before starting a new one
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
             try {
                 const response = await fetch(`${API_BASE}/api/leaderboard-timer`);
                 if (response.ok) {
@@ -160,20 +170,7 @@
             startTimer();
         });
 
-        // Handle tab visibility changes
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                pauseTimer();
-            } else {
-                // When tab becomes visible, resume the timer from current time
-                if (!countdownInterval && endTime) {
-                    resumeTimer();
-                } else if (!endTime) {
-                    // If no timer exists, start a new one
-                    startTimer();
-                }
-            }
-        });
+
 
         // Refresh leaderboard every 10 seconds
         setInterval(loadLeaderboard, 10000);
