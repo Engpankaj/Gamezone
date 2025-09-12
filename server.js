@@ -57,6 +57,7 @@ const LeaderboardTimer = mongoose.model('LeaderboardTimer', leaderboardTimerSche
 
 // Global leaderboard timer
 let leaderboardEndTime = null;
+let resetTimeout = null;
 const RESET_INTERVAL = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
 
 // Initialize leaderboard timer - load from DB if exists, otherwise start fresh 12 hours
@@ -72,9 +73,12 @@ async function initializeLeaderboardTimer() {
       await LeaderboardTimer.findOneAndUpdate({}, { endTime: leaderboardEndTime }, { upsert: true });
       console.log('Leaderboard timer initialized with fresh 12 hours');
     }
+    // Schedule the reset
+    scheduleLeaderboardReset();
   } catch (error) {
     console.error('Error initializing leaderboard timer:', error);
     leaderboardEndTime = Date.now() + RESET_INTERVAL;
+    scheduleLeaderboardReset();
   }
 }
 
@@ -82,14 +86,41 @@ async function resetLeaderboardTimer() {
   try {
     leaderboardEndTime = Date.now() + RESET_INTERVAL;
     await LeaderboardTimer.findOneAndUpdate({}, { endTime: leaderboardEndTime }, { upsert: true });
+    // Schedule the next reset
+    scheduleLeaderboardReset();
   } catch (error) {
     console.error('Error resetting leaderboard timer:', error);
   }
 }
 
-// Auto-reset leaderboard every 12 hours
-setInterval(async () => {
+// Schedule leaderboard reset using setTimeout for precise timing
+function scheduleLeaderboardReset() {
+  if (resetTimeout) {
+    clearTimeout(resetTimeout);
+  }
+
+  const now = Date.now();
+  const timeUntilReset = leaderboardEndTime - now;
+
+  if (timeUntilReset <= 0) {
+    // Timer has already expired, reset immediately
+    performLeaderboardReset();
+  } else {
+    // Schedule the reset
+    resetTimeout = setTimeout(async () => {
+      await performLeaderboardReset();
+    }, timeUntilReset);
+
+    console.log(`Leaderboard reset scheduled in ${Math.ceil(timeUntilReset / 1000 / 60)} minutes`);
+  }
+}
+
+// Perform the actual leaderboard reset
+async function performLeaderboardReset() {
   try {
+    console.log('Performing leaderboard reset...');
+
+    // Reset all user stats to zero
     await User.updateMany({}, {
       gamesPlayed: 0,
       differentGames: 0,
@@ -97,12 +128,17 @@ setInterval(async () => {
       gamesPlayedTypes: [],
       rank: 1
     });
-    resetLeaderboardTimer();
-    console.log('Leaderboard auto-reset completed');
+
+    // Reset the timer for the next 12 hours
+    await resetLeaderboardTimer();
+
+    console.log('Leaderboard auto-reset completed and new timer started');
   } catch (error) {
     console.error('Auto-reset leaderboard error:', error);
+    // Retry after 1 minute if there's an error
+    setTimeout(() => performLeaderboardReset(), 60000);
   }
-}, RESET_INTERVAL);
+}
 
 // API Routes
 
