@@ -58,7 +58,7 @@ const LeaderboardTimer = mongoose.model('LeaderboardTimer', leaderboardTimerSche
 // Global leaderboard timer
 let leaderboardEndTime = null;
 let resetTimeout = null;
-const RESET_INTERVAL = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
+const RESET_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 // Initialize leaderboard timer - load from DB if exists, otherwise start fresh 12 hours
 async function initializeLeaderboardTimer() {
@@ -68,10 +68,10 @@ async function initializeLeaderboardTimer() {
       leaderboardEndTime = existingTimer.endTime;
       console.log('Leaderboard timer loaded from DB:', new Date(leaderboardEndTime).toISOString());
     } else {
-      // Start fresh 12 hours if no valid timer exists
+      // Start fresh 24 hours if no valid timer exists
       leaderboardEndTime = Date.now() + RESET_INTERVAL;
       await LeaderboardTimer.findOneAndUpdate({}, { endTime: leaderboardEndTime }, { upsert: true });
-      console.log('Leaderboard timer initialized with fresh 12 hours');
+      console.log('Leaderboard timer initialized with fresh 24 hours');
     }
     // Schedule the reset
     scheduleLeaderboardReset();
@@ -129,7 +129,7 @@ async function performLeaderboardReset() {
       rank: 1
     });
 
-    // Reset the timer for the next 12 hours
+    // Reset the timer for the next 24 hours
     await resetLeaderboardTimer();
 
     console.log('Leaderboard auto-reset completed and new timer started');

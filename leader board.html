@@ -94,11 +94,11 @@
             const minutes = Math.floor((timeLeft % 3600) / 60);
             const seconds = timeLeft % 60;
 
-            // Convert to 12-hour format without AM/PM
-            const hours12 = totalHours % 12 || 12; // Convert 0 to 12
+            // Use 24-hour format
+            const hours24 = totalHours;
 
             const timerText = document.getElementById('timer-text');
-            timerText.textContent = `Reset In: ${hours12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            timerText.textContent = `Reset In: ${hours24.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
             if (timeLeft <= 0) {
                 resetLeaderboard();
