@@ -27,8 +27,9 @@ const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/gamezone';
 mongoose.connect(mongoURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
-}).then(() => {
+}).then(async () => {
   console.log('MongoDB connected successfully');
+  await createDefaultAdmin();
 }).catch(err => {
   console.error('MongoDB connection error:', err);
 });
@@ -392,11 +393,177 @@ app.get('/api/leaderboard-timer', (req, res) => {
   res.json({ endTime: leaderboardEndTime });
 });
 
+// Admin get all users
+app.get('/api/admin/users', async (req, res) => {
+  console.log('Admin users endpoint called');
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    console.log('No token provided');
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  const token = authHeader.substring(7);
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    console.log('Decoded token:', decoded);
+    const adminUser = await User.findOne({ userId: decoded.userId });
+    console.log('Admin user found:', adminUser);
+
+    if (!adminUser || !adminUser.isAdmin) {
+      console.log('Admin access denied');
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const users = await User.find({});
+    console.log('Users found:', users.length);
+    res.json({ users });
+  } catch (err) {
+    console.error('Admin users error:', err);
+    res.status(401).json({ error: 'Invalid token' });
+  }
+});
+
+// Admin get specific user
+app.get('/api/admin/user/:userId', async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  const token = authHeader.substring(7);
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const adminUser = await User.findOne({ userId: decoded.userId });
+
+    if (!adminUser || !adminUser.isAdmin) {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const { userId } = req.params;
+    const user = await User.findOne({ userId });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ user });
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+});
+
+// Admin delete user
+app.delete('/api/admin/delete-user/:userId', async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  const token = authHeader.substring(7);
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const adminUser = await User.findOne({ userId: decoded.userId });
+
+    if (!adminUser || !adminUser.isAdmin) {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const { userId } = req.params;
+    const userToDelete = await User.findOneAndDelete({ userId });
+
+    if (!userToDelete) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ message: 'User deleted successfully' });
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+});
+
+// Admin edit user
+app.put('/api/admin/edit-user/:userId', async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  const token = authHeader.substring(7);
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const adminUser = await User.findOne({ userId: decoded.userId });
+
+    if (!adminUser || !adminUser.isAdmin) {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const { userId } = req.params;
+    const { newUserId, username, isAdmin } = req.body;
+
+    // Check if new userId already exists (if different from current)
+    if (newUserId !== userId) {
+      const existingUser = await User.findOne({ userId: newUserId });
+      if (existingUser) {
+        return res.status(400).json({ error: 'New User ID already exists' });
+      }
+    }
+
+    const updatedUser = await User.findOneAndUpdate(
+      { userId },
+      {
+        userId: newUserId,
+        username,
+        isAdmin
+      },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ message: 'User updated successfully', user: updatedUser });
+  } catch (err) {
+    console.error('Edit user error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Global error handler middleware
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({ error: 'Internal server error' });
 });
+
+// Function to create default admin user if not exists
+async function createDefaultAdmin() {
+  try {
+    const adminUserId = 'admin';
+    const adminPassword = 'admin123';
+    const adminUsername = 'Administrator';
+
+    const existingAdmin = await User.findOne({ userId: adminUserId });
+    if (!existingAdmin) {
+      const adminUser = new User({
+        userId: adminUserId,
+        username: adminUsername,
+        password: adminPassword,
+        isAdmin: true,
+        gamesPlayed: 0,
+        differentGames: 0,
+        totalReward: 0,
+        gamesPlayedTypes: [],
+        rank: 1
+      });
+      await adminUser.save();
+      console.log('Default admin user created with userId: admin and password: admin123');
+    } else {
+      console.log('Default admin user already exists');
+    }
+  } catch (error) {
+    console.error('Error creating default admin user:', error);
+  }
+}
 
 // Start server
 app.listen(PORT, '0.0.0.0', () => {

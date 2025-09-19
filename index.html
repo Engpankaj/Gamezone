@@ -134,6 +134,9 @@
             <div id="accountOptions" class="auth-form" style="display: none;">
                 <h3>Welcome, <span id="currentUsername"></span>!</h3>
                 <p>User ID: <span id="currentUserId"></span></p>
+                <div id="adminLink" style="display: none;">
+                    <button id="adminPanelBtn" class="auth-btn">Admin Panel</button>
+                </div>
                 <button id="logoutBtn" class="auth-btn logout-btn">Logout</button>
                 <button id="deleteAccountBtn" class="auth-btn delete-btn">Delete Account</button>
             </div>
@@ -373,17 +376,25 @@
             if (user) {
                 if (user.isAdmin) {
                     profileStatus.textContent = "Admin";
+                    document.getElementById('adminLink').style.display = 'block';
                 } else {
                     profileStatus.textContent = user.username;
+                    document.getElementById('adminLink').style.display = 'none';
                 }
                 currentUsername.textContent = user.username;
                 currentUserId.textContent = user.userId;
                 authTabs.style.display = 'none';
             } else {
                 profileStatus.textContent = 'Login';
+                document.getElementById('adminLink').style.display = 'none';
                 authTabs.style.display = 'flex';
             }
         }
+
+        // Admin panel button
+        document.getElementById('adminPanelBtn').addEventListener('click', () => {
+            window.location.href = 'admin.html';
+        });
 
         // Burger menu functionality
         const burgerMenu = document.getElementById('burgerMenu');

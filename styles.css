@@ -438,9 +438,101 @@ body {
     background: linear-gradient(45deg, #ff6b6b, #e74c3c);
 }
 
+.edit-btn {
+    background: linear-gradient(45deg, #4ecdc4, #44a08d);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    margin-right: 0.5rem;
+}
+
+.edit-btn:hover {
+    background: linear-gradient(45deg, #44a08d, #3d8b7a);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
 .delete-btn {
     background: linear-gradient(45deg, #e74c3c, #c0392b);
-    margin-top: 1rem;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.delete-btn:hover {
+    background: linear-gradient(45deg, #c0392b, #a93226);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+/* Admin Panel Styles */
+.admin-panel {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 1200px;
+    width: 90%;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.admin-panel h1 {
+    color: white;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.admin-controls {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.users-table-container {
+    overflow-x: auto;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.users-table th {
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    padding: 1rem;
+    text-align: left;
+    font-weight: bold;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.users-table td {
+    padding: 0.8rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background 0.3s ease;
+}
+
+.users-table tr:hover td {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.users-table tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
 }
 
 
@@ -651,6 +743,33 @@ body {
         font-size: 0.8rem;
         margin-top: 0.5rem;
         padding: 0 1rem;
+    }
+
+    .admin-panel {
+        padding: 1rem;
+        width: 95%;
+    }
+
+    .admin-panel h1 {
+        font-size: 2rem;
+    }
+
+    .users-table-container {
+        padding: 0.5rem;
+    }
+
+    .users-table {
+        font-size: 0.8rem;
+    }
+
+    .users-table th,
+    .users-table td {
+        padding: 0.5rem;
+    }
+
+    .delete-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
     }
 
 

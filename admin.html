@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Game Arena</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <div class="logo-icon">GZ</div>
+            <div class="logo-text">gamezone</div>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <ul class="nav-links desktop-nav">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="dice game.html">Dice Game</a></li>
+            <li><a href="slot game.html">Slot Game</a></li>
+            <li><a href="QA.html">Q/A Game</a></li>
+            <li><a href="battel.html">Battel Spin</a></li>
+            <li><a href="leader board.html">Leader Board</a></li>
+        </ul>
+
+        <!-- Profile Icon on Desktop -->
+        <div class="navbar-profile">
+            <div class="profile-logo" id="profileLogo">
+                <div class="profile-icon">👤</div>
+                <div class="profile-status" id="profileStatus">Login</div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div class="mobile-nav">
+            <!-- Burger Menu -->
+            <div class="burger-menu" id="burgerMenu">
+                <div class="burger-line"></div>
+                <div class="burger-line"></div>
+                <div class="burger-line"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Side Menu -->
+    <div class="side-menu" id="sideMenu">
+        <div class="side-menu-content">
+            <div class="side-menu-header">
+                <h3>Game Menu</h3>
+                <span class="close-menu" id="closeMenu">&times;</span>
+            </div>
+            <ul class="mobile-nav-links">
+                <li><a href="index.html">🏠 Home</a></li>
+                <li><a href="dice game.html">🎲 Dice Game</a></li>
+                <li><a href="slot game.html">🎰 Slot Game</a></li>
+                <li><a href="QA.html">❓ Q/A Game</a></li>
+                <li><a href="battel.html">⚔️ Battel Spin</a></li>
+                <li><a href="leader board.html">🏆 Leader Board</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Video Background -->
+        <video class="video-background" autoplay muted loop playsinline>
+            <source src="background.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="admin-panel">
+            <h1>Admin Panel</h1>
+            <div class="admin-controls">
+                <button id="resetLeaderboardBtn" class="auth-btn">Reset Leaderboard</button>
+                <input type="text" id="searchUserId" placeholder="Search User ID" style="margin-left: 1rem; padding: 0.5rem; border-radius: 5px; border: none; font-size: 1rem; width: 200px;">
+                <button id="searchUserBtn" class="auth-btn" style="margin-left: 0.5rem;">Search</button>
+            </div>
+            <div class="users-table-container">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Username</th>
+                            <th>Admin</th>
+                            <th>Games Played</th>
+                            <th>Different Games</th>
+                            <th>Total Coins</th>
+                            <th>Game Types</th>
+                            <th>Rank</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- User data will be populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Edit User Modal -->
+    <div id="editModal" class="modal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5);">
+        <div class="modal-content" style="background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 400px; border-radius: 10px;">
+            <span id="closeEditModal" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            <h2>Edit User</h2>
+            <form id="editUserForm">
+                <label for="editUserId">User ID:</label><br>
+                <input type="text" id="editUserId" name="editUserId" required style="width: 100%; padding: 8px; margin-bottom: 10px;"><br>
+                <label for="editUsername">Username:</label><br>
+                <input type="text" id="editUsername" name="editUsername" required style="width: 100%; padding: 8px; margin-bottom: 10px;"><br>
+                <label for="editIsAdmin">Admin:</label>
+                <input type="checkbox" id="editIsAdmin" name="editIsAdmin" style="margin-left: 10px;"><br><br>
+                <button type="submit" style="background-color: #4ecdc4; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">GAMEZONE</div>
+            <ul class="footer-links">
+                <li><a href="#">Privacy Policy</a></li>
+                <li><a href="#">Terms of Service</a></li>
+                <li><a href="https://wa.me/917060874573" target="_blank">Support</a></li>
+                <li><a href="#">About Us</a></li>
+            </ul>
+        </div>
+        <div class="copyright">
+            © 2025 GameZone. Made By Pankaj.
+        </div>
+    </footer>
+
+    <script>
+        // API base URL for local testing vs deployment
+        const API_BASE = window.location.hostname === '127.0.0.1' ? 'http://127.0.0.1:3000' : '';
+
+        // Check if user is logged in and is admin
+        async function checkAdminAccess() {
+            try {
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    alert('Please login first');
+                    window.location.href = 'index.html';
+                    return false;
+                }
+                const response = await fetch(`${API_BASE}/api/profile`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (!data.user.isAdmin) {
+                        alert('Admin access required');
+                        window.location.href = 'index.html';
+                        return false;
+                    }
+                    updateProfileUI(data.user);
+                    return true;
+                } else {
+                    alert('Please login first');
+                    window.location.href = 'index.html';
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error checking admin access:', error);
+                alert('Error checking access');
+                window.location.href = 'index.html';
+                return false;
+            }
+        }
+
+        async function loadUsers() {
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`${API_BASE}/api/admin/users`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    const usersTableBody = document.getElementById('usersTableBody');
+                    usersTableBody.innerHTML = '';
+
+                    data.users.forEach(user => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${user.userId}</td>
+                            <td>${user.username}</td>
+                            <td>${user.isAdmin ? 'Yes' : 'No'}</td>
+                            <td>${user.gamesPlayed}</td>
+                            <td>${user.differentGames}</td>
+                            <td>${user.totalReward}</td>
+                            <td>${user.gamesPlayedTypes.join(', ')}</td>
+                            <td>${user.rank}</td>
+                            <td>
+                                <button class="edit-btn" data-userid="${user.userId}" data-username="${user.username}" data-isadmin="${user.isAdmin}">Edit</button>
+                                <button class="delete-btn" data-userid="${user.userId}">Delete</button>
+                            </td>
+                        `;
+                        usersTableBody.appendChild(row);
+                    });
+
+                    // Add event listeners for edit buttons
+                    document.querySelectorAll('.edit-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const userId = e.target.getAttribute('data-userid');
+                            const username = e.target.getAttribute('data-username');
+                            const isAdmin = e.target.getAttribute('data-isadmin') === 'true';
+                            openEditModal(userId, username, isAdmin);
+                        });
+                    });
+
+                    // Add event listeners for delete buttons
+                    document.querySelectorAll('.delete-btn').forEach(btn => {
+                        btn.addEventListener('click', async (e) => {
+                            const userId = e.target.getAttribute('data-userid');
+                            if (confirm(`Are you sure you want to delete user ${userId}? This action cannot be undone.`)) {
+                                await deleteUser(userId);
+                            }
+                        });
+                    });
+                } else {
+                    console.error('Failed to load users');
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        async function deleteUser(userId) {
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`${API_BASE}/api/admin/delete-user/${userId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.ok) {
+                    alert(`User ${userId} deleted successfully`);
+                    loadUsers();
+                } else {
+                    alert(`Failed to delete user ${userId}`);
+                }
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                alert('Error deleting user');
+            }
+        }
+
+        async function resetLeaderboard() {
+            if (!confirm('Are you sure you want to reset the leaderboard? This will reset all user stats to zero.')) {
+                return;
+            }
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`${API_BASE}/api/reset-leaderboard`, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.ok) {
+                    alert('Leaderboard reset successfully');
+                    loadUsers();
+                } else {
+                    alert('Failed to reset leaderboard');
+                }
+            } catch (error) {
+                console.error('Error resetting leaderboard:', error);
+                alert('Error resetting leaderboard');
+            }
+        }
+
+        function updateProfileUI(user) {
+            if (user) {
+                if (user.isAdmin) {
+                    profileStatus.textContent = "Admin";
+                } else {
+                    profileStatus.textContent = user.username;
+                }
+            } else {
+                profileStatus.textContent = 'Login';
+            }
+        }
+
+        // Profile logo click
+        profileLogo.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+
+        // Reset leaderboard button
+        resetLeaderboardBtn.addEventListener('click', resetLeaderboard);
+
+        // Search user functionality
+        searchUserBtn.addEventListener('click', searchUser);
+        searchUserId.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchUser();
+            }
+        });
+
+        async function searchUser() {
+            const userId = searchUserId.value.trim();
+            if (!userId) {
+                alert('Please enter a User ID to search');
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`${API_BASE}/api/admin/user/${userId}`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const user = data.user;
+                    const usersTableBody = document.getElementById('usersTableBody');
+                    usersTableBody.innerHTML = '';
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${user.userId}</td>
+                        <td>${user.username}</td>
+                        <td>${user.isAdmin ? 'Yes' : 'No'}</td>
+                        <td>${user.gamesPlayed}</td>
+                        <td>${user.differentGames}</td>
+                        <td>${user.totalReward}</td>
+                        <td>${user.gamesPlayedTypes.join(', ')}</td>
+                        <td>${user.rank}</td>
+                        <td>
+                            <button class="edit-btn" data-userid="${user.userId}" data-username="${user.username}" data-isadmin="${user.isAdmin}">Edit</button>
+                            <button class="delete-btn" data-userid="${user.userId}">Delete</button>
+                        </td>
+                    `;
+                    usersTableBody.appendChild(row);
+
+                    // Add event listeners for edit and delete buttons
+                    document.querySelector('.edit-btn').addEventListener('click', (e) => {
+                        const userId = e.target.getAttribute('data-userid');
+                        const username = e.target.getAttribute('data-username');
+                        const isAdmin = e.target.getAttribute('data-isadmin') === 'true';
+                        openEditModal(userId, username, isAdmin);
+                    });
+
+                    document.querySelector('.delete-btn').addEventListener('click', async (e) => {
+                        const userId = e.target.getAttribute('data-userid');
+                        if (confirm(`Are you sure you want to delete user ${userId}? This action cannot be undone.`)) {
+                            await deleteUser(userId);
+                        }
+                    });
+                } else if (response.status === 404) {
+                    alert('User not found');
+                } else {
+                    alert('Failed to search user');
+                }
+            } catch (error) {
+                console.error('Error searching user:', error);
+                alert('Error searching user');
+            }
+        }
+
+        // Initialize
+        checkAdminAccess().then(isAdmin => {
+            if (isAdmin) {
+                loadUsers();
+            }
+        });
+
+        // Burger menu functionality
+        const burgerMenu = document.getElementById('burgerMenu');
+        const sideMenu = document.getElementById('sideMenu');
+        const closeMenu = document.getElementById('closeMenu');
+
+        burgerMenu.addEventListener('click', () => {
+            sideMenu.classList.toggle('open');
+        });
+
+        closeMenu.addEventListener('click', () => {
+            sideMenu.classList.remove('open');
+        });
+
+        // Close menu when clicking outside
+        window.addEventListener('click', (event) => {
+            if (event.target === sideMenu) {
+                sideMenu.classList.remove('open');
+            }
+        });
+
+        // Close menu when clicking on a link
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav-links a');
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                sideMenu.classList.remove('open');
+            });
+        });
+
+        // Edit modal functionality
+        function openEditModal(userId, username, isAdmin) {
+            document.getElementById('editUserId').value = userId;
+            document.getElementById('editUsername').value = username;
+            document.getElementById('editIsAdmin').checked = isAdmin;
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        // Close edit modal
+        document.getElementById('closeEditModal').addEventListener('click', () => {
+            document.getElementById('editModal').style.display = 'none';
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (event) => {
+            const modal = document.getElementById('editModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Edit user form submission
+        document.getElementById('editUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const originalUserId = e.target.editUserId.getAttribute('data-original-userid') || e.target.editUserId.value;
+            const newUserId = e.target.editUserId.value;
+            const username = e.target.editUsername.value;
+            const isAdmin = e.target.editIsAdmin.checked;
+
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`${API_BASE}/api/admin/edit-user/${originalUserId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        newUserId: newUserId,
+                        username: username,
+                        isAdmin: isAdmin
+                    })
+                });
+
+                if (response.ok) {
+                    alert('User updated successfully');
+                    document.getElementById('editModal').style.display = 'none';
+                    loadUsers();
+                } else {
+                    const errorData = await response.json();
+                    alert(`Failed to update user: ${errorData.error}`);
+                }
+            } catch (error) {
+                console.error('Error updating user:', error);
+                alert('Error updating user');
+            }
+        });
+
+        // Store original user ID when opening modal
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const userId = e.target.getAttribute('data-userid');
+                document.getElementById('editUserId').setAttribute('data-original-userid', userId);
+            });
+        });
+    </script>
+</body>
+</html>

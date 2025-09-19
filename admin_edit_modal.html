@@ -1,0 +1,15 @@
+<div id="editModal" class="modal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5);">
+  <div class="modal-content" style="background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 400px; border-radius: 10px;">
+    <span id="closeEditModal" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+    <h2>Edit User</h2>
+    <form id="editUserForm">
+      <label for="editUserId">User ID:</label><br>
+      <input type="text" id="editUserId" name="editUserId" required style="width: 100%; padding: 8px; margin-bottom: 10px;"><br>
+      <label for="editUsername">Username:</label><br>
+      <input type="text" id="editUsername" name="editUsername" required style="width: 100%; padding: 8px; margin-bottom: 10px;"><br>
+      <label for="editIsAdmin">Admin:</label>
+      <input type="checkbox" id="editIsAdmin" name="editIsAdmin" style="margin-left: 10px;"><br><br>
+      <button type="submit" style="background-color: #4ecdc4; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Save Changes</button>
+    </form>
+  </div>
+</div>
